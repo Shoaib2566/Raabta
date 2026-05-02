@@ -8,6 +8,10 @@ const { createClient } = require('@supabase/supabase-js');
 const app = express();
 app.use(cors());
 app.use(express.json());
+app.use((req, res, next) => {
+    console.log(`[${new Date().toLocaleTimeString()}] incoming request: ${req.method} ${req.url}`);
+    next();
+});
 
 // --- Database Configuration ---
 // Ensure you have SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env file
