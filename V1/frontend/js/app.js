@@ -2,7 +2,7 @@
 // Backend team: configure API base with window.API_BASE_URL before loading this file if needed.
 (function(){
 'use strict';
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8000/api';
 const pageIds=['pg-home','pg-auth','pg-customer','pg-admin','pg-supervisor'];
 const byId=id=>document.getElementById(id);
 const nativeScroll=window.scrollTo.bind(window);
@@ -14,8 +14,87 @@ window.goPage=function(id){pageIds.forEach(pid=>{const p=byId(pid); if(p)p.class
 window.scrollToSection=function(id){goPage('pg-home');setTimeout(()=>{const el=byId(id); if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},80);};
 window.scrollTo=function(arg){if(typeof arg==='string')return scrollToSection(arg); return nativeScroll(arg);};
 window.authTab=function(mode,btn){document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));const tabs=document.querySelectorAll('.auth-tab'); if(btn)btn.classList.add('active'); else if(tabs[mode==='login'?0:1])tabs[mode==='login'?0:1].classList.add('active'); byId('ap-'+mode)?.classList.add('active'); if(byId('auth-heading'))byId('auth-heading').textContent=mode==='login'?'Welcome Back':'Create Account'; if(byId('auth-sub'))byId('auth-sub').textContent=mode==='login'?'Sign in to your Raabta account':'Join thousands using Raabta';};
-window.authLogin=function(){const r=(prompt('Demo role: customer / admin / supervisor')||'customer').toLowerCase().trim(); if(r==='admin')goPage('pg-admin'); else if(r==='supervisor')goPage('pg-supervisor'); else goPage('pg-customer');};
-window.authSignup=function(){const r=(byId('su-role')?.value||'').toLowerCase(); if(!r){alert('Please select a role.');return} if(r==='admin')goPage('pg-admin'); else if(r==='supervisor')goPage('pg-supervisor'); else goPage('pg-customer');};
+
+window.authSignup = async function() {
+    const nameInput = document.querySelector('#ap-signup input[type="text"]').value;
+    const emailInput = document.querySelector('#ap-signup input[type="email"]').value;
+    const passwordInput = document.querySelector('#ap-signup input[type="password"]').value;
+    const roleInput = document.getElementById('su-role').value;
+
+    if (!nameInput || !emailInput || !passwordInput || !roleInput) {
+        alert("Please fill in all fields.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/signup`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({
+                full_name: nameInput,
+                email: emailInput,
+                password: passwordInput,
+                role: roleInput
+            })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            alert('Account created successfully in the database!');
+            localStorage.setItem('raabta_token', data.token);
+            
+            
+            if(data.user.role === 'admin') goPage('pg-admin');
+            else if(data.user.role === 'supervisor') goPage('pg-supervisor');
+            else goPage('pg-customer');
+        } else {
+            alert('Signup Failed: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Could not connect to the backend. Is Port 8000 running?');
+    }
+};
+
+window.authLogin = async function() {
+    const emailInput = document.querySelector('#ap-login input[type="email"]').value;
+    const passwordInput = document.querySelector('#ap-login input[type="password"]').value;
+
+    if (!emailInput || !passwordInput) {
+        alert("Please enter both email and password.");
+        return;
+    }
+
+    try {
+        const response = await fetch(`${API_BASE_URL}/auth/login`, {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ email: emailInput, password: passwordInput })
+        });
+
+        const data = await response.json();
+
+        if (response.ok) {
+            localStorage.setItem('raabta_token', data.token);
+            
+            if(data.user.role === 'admin') goPage('pg-admin');
+            else if(data.user.role === 'supervisor') goPage('pg-supervisor');
+            else goPage('pg-customer');
+        } else {
+            alert('Login Failed: ' + data.error);
+        }
+    } catch (error) {
+        console.error('Error:', error);
+        alert('Could not connect to the backend. Is Port 8000 running?');
+    }
+};
+
+
+
+
+
+
 function showSection(scope,id,link,titleId,titles){document.querySelectorAll(`#${scope} .dsection`).forEach(s=>s.classList.remove('active'));document.querySelectorAll(`#${scope} .sb-link`).forEach(a=>a.classList.remove('active'));byId(id)?.classList.add('active'); if(link)link.classList.add('active'); if(byId(titleId)&&titles[id])byId(titleId).textContent=titles[id];}
 window.cShow=function(id,link){const ids=['c-dash','c-neworder','c-services','c-history','c-plans','c-complaints','c-profile']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-customer .sb-link')[i]:null} showSection('pg-customer',id,link,'c-title',{'c-dash':'Dashboard','c-neworder':'New Order','c-services':'Services','c-history':'Order History','c-plans':'My Plan','c-complaints':'Complaints','c-profile':'Profile'});};
 window.aShow=function(id,link){const ids=['a-services','a-analytics','a-users','a-logs','a-complaints']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-admin .sb-link')[i]:null} showSection('pg-admin',id,link,'a-title',{'a-services':'Services','a-analytics':'Analytics','a-users':'User Management','a-logs':'Activity Logs','a-complaints':'Complaints'});};
