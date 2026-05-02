@@ -1,0 +1,1311 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width,initial-scale=1.0"/>
+<title>Raabta — Your Helping Hand in Pakistan</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"/>
+<link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
+<style>
+/* ═══════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════ */
+:root {
+  --g900:#0B1F14; --g800:#132A1B; --g700:#1A3823; --g600:#24502F;
+  --g500:#2E6B3E; --g400:#4A8C5C; --g300:#7AB98A;
+  --gold:#C9A84C; --gold2:#E2C47A; --gold3:#F5E6B8; --gold4:#FDF8EC;
+  --cream:#F8F4EE; --white:#FFFFFF;
+  --text:#1C1C1C; --muted:#6B7563; --border:#D9D3C3;
+  --dark-footer:#080F0A;
+  --sidebar-w:224px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+
+/* ══════════════════════════════════
+   GLOBAL BUTTONS
+══════════════════════════════════ */
+.btn-gold{padding:.45rem 1.2rem;background:var(--gold);color:var(--g900);border:none;border-radius:6px;font-size:.855rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-ghost-nav{padding:.45rem 1.2rem;border:1.5px solid rgba(201,168,76,.45);color:var(--gold2);border-radius:6px;font-size:.855rem;font-weight:500;cursor:pointer;background:none;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-ghost-nav:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+
+/* ══════════════════════════════════
+   NAV
+══════════════════════════════════ */
+.topnav{
+  position:sticky;top:0;z-index:200;
+  background:var(--g900);padding:0 5%;height:68px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(201,168,76,.18);
+}
+.logo{font-family:'Playfair Display',serif;font-size:1.86rem;font-weight:900;color:var(--gold);letter-spacing:-.6px;cursor:pointer;line-height:1;text-shadow:0 2px 14px rgba(201,168,76,.14)}
+.logo span{color:inherit}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{text-decoration:none;color:rgba(255,255,255,.55);font-size:.875rem;font-weight:500;transition:color .2s;cursor:pointer}
+.nav-links a:hover{color:var(--gold2)}
+.nav-right{display:flex;gap:.65rem;align-items:center}
+
+/* ══════════════════════════════════
+   HERO
+══════════════════════════════════ */
+.hero{
+  background:var(--g900);
+  background-image:radial-gradient(ellipse 65% 70% at 85% 50%,rgba(42,80,62,.6) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 40% at 15% 80%,rgba(201,168,76,.06) 0%,transparent 70%);
+  padding:7rem 5% 6rem;
+  display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;
+  min-height:calc(100vh - 68px);
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);
+  color:var(--gold2);padding:.3rem .9rem;border-radius:100px;
+  font-size:.72rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:1.5rem;
+}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.4rem,4.2vw,3.6rem);font-weight:800;
+  color:var(--white);line-height:1.15;margin-bottom:1.25rem;letter-spacing:-.5px;
+}
+.hero h1 em{color:var(--gold);font-style:italic;display:block}
+.hero-tagline{
+  font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--gold);margin-bottom:1rem;
+}
+.hero-sub{color:rgba(255,255,255,.52);font-size:1rem;line-height:1.75;max-width:460px;margin-bottom:2.25rem}
+.hero-cta{display:flex;gap:.85rem;align-items:center;flex-wrap:wrap}
+.btn-hero{
+  padding:.8rem 2rem;background:var(--gold);color:var(--g900);
+  border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+  font-family:'Outfit',sans-serif;transition:all .25s;
+  box-shadow:0 6px 24px rgba(201,168,76,.3);
+}
+.btn-hero:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 10px 32px rgba(201,168,76,.38)}
+.btn-hero-ghost{
+  padding:.8rem 1.5rem;color:rgba(255,255,255,.5);font-size:.95rem;
+  cursor:pointer;background:none;border:1.5px solid rgba(255,255,255,.15);
+  border-radius:8px;font-family:'Outfit',sans-serif;transition:all .2s;
+}
+.btn-hero-ghost:hover{color:var(--gold2);border-color:rgba(201,168,76,.4)}
+/* floating order cards */
+.hero-visual{display:flex;justify-content:center;align-items:center}
+.card-stack{position:relative;width:360px;height:310px}
+.hcard{
+  position:absolute;
+  background:rgba(255,255,255,.055);backdrop-filter:blur(14px);
+  border:1px solid rgba(201,168,76,.18);border-radius:16px;padding:1.4rem 1.6rem;
+}
+.hcard-a{width:275px;bottom:0;left:0}
+.hcard-b{width:258px;top:0;right:0;border-top:2px solid var(--gold)}
+.hcard-tag{font-size:.67rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gold2);margin-bottom:.5rem}
+.hcard-name{font-weight:600;font-size:.93rem;color:var(--white);margin-bottom:.65rem}
+.hdivider{height:1px;background:rgba(255,255,255,.1);margin:.65rem 0}
+.hrow{display:flex;justify-content:space-between;font-size:.77rem;color:rgba(255,255,255,.4)}
+.hrow strong{color:rgba(255,255,255,.78)}
+
+/* ══════════════════════════════════
+   STATS
+══════════════════════════════════ */
+.statsbar{
+  background:var(--gold);padding:2.25rem 5%;
+  display:grid;grid-template-columns:repeat(4,1fr);text-align:center;
+}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:800;color:var(--g900)}
+.stat-lbl{font-size:.8rem;font-weight:500;color:rgba(11,31,20,.6);margin-top:.1rem}
+.stat-divider{width:1px;background:rgba(11,31,20,.12);margin:auto}
+
+/* ══════════════════════════════════
+   SECTION CHROME
+══════════════════════════════════ */
+.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--g500);margin-bottom:.5rem}
+.section-title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--g800);margin-bottom:.7rem}
+.section-sub{color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7;font-size:.95rem}
+.section-header{text-align:center;margin-bottom:3rem}
+.section-header.left{text-align:left}
+.section-header.left .section-sub{margin:0}
+
+/* ══════════════════════════════════
+   SERVICES SECTION
+══════════════════════════════════ */
+.services-section{padding:5.5rem 5%;background:var(--cream)}
+.svcs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:1.4rem}
+.svc-card{
+  background:var(--white);border:1px solid var(--border);border-radius:14px;
+  padding:1.85rem 1.65rem;transition:all .25s;
+}
+.svc-card:hover{transform:translateY(-5px);box-shadow:0 14px 44px rgba(42,80,62,.12);border-color:var(--g400)}
+.svc-icon{width:48px;height:48px;background:rgba(42,80,62,.07);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem;font-size:1.35rem}
+.svc-title{font-weight:600;font-size:.975rem;color:var(--g800);margin-bottom:.4rem}
+.svc-desc{font-size:.845rem;color:var(--muted);line-height:1.65;margin-bottom:.9rem}
+.svc-tag{display:inline-block;background:var(--gold4);color:var(--g600);font-size:.72rem;font-weight:600;padding:.2rem .65rem;border-radius:100px;border:1px solid rgba(201,168,76,.3)}
+
+/* ══════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════ */
+.how-section{padding:5.5rem 5%;background:var(--g900)}
+.how-section .section-title{color:var(--white)}
+.how-section .section-label{color:var(--gold2)}
+.how-section .section-sub{color:rgba(255,255,255,.45)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3rem;position:relative}
+.steps::before{content:'';position:absolute;top:26px;left:10%;right:10%;height:1px;background:rgba(201,168,76,.2)}
+.step{text-align:center;position:relative}
+.step-num{width:52px;height:52px;background:var(--gold);color:var(--g900);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;margin:0 auto 1.1rem;position:relative;z-index:1;box-shadow:0 4px 16px rgba(201,168,76,.35)}
+.step-title{font-weight:600;color:var(--white);margin-bottom:.35rem;font-size:.95rem}
+.step-desc{font-size:.82rem;color:rgba(255,255,255,.42);line-height:1.6}
+
+/* ══════════════════════════════════
+   PRICING
+══════════════════════════════════ */
+.pricing-section{padding:5.5rem 5%;background:var(--cream)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.price-card{
+  background:var(--white);border:1px solid var(--border);border-radius:16px;
+  padding:2rem 1.85rem;position:relative;overflow:hidden;transition:all .25s;
+}
+.price-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(42,80,62,.1)}
+.price-card.featured{background:var(--g800);border-color:var(--gold);}
+.price-card.featured .plan-name{color:var(--gold2)}
+.price-card.featured .plan-price{color:var(--white)}
+.price-card.featured .plan-desc{color:rgba(255,255,255,.5)}
+.price-card.featured .plan-feature{color:rgba(255,255,255,.75);border-bottom-color:rgba(255,255,255,.08)}
+.price-card.featured .plan-feature::before{color:var(--gold)}
+.featured-badge{
+  position:absolute;top:1.2rem;right:1.2rem;
+  background:var(--gold);color:var(--g900);font-size:.68rem;font-weight:700;
+  padding:.2rem .65rem;border-radius:100px;text-transform:uppercase;letter-spacing:.4px;
+}
+.plan-name{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g500);margin-bottom:.6rem}
+.plan-price{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:800;color:var(--g800);line-height:1}
+.plan-price span{font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:400;color:var(--muted)}
+.plan-desc{font-size:.845rem;color:var(--muted);margin:.6rem 0 1.4rem;line-height:1.6}
+.plan-features{list-style:none;margin-bottom:1.75rem}
+.plan-feature{font-size:.845rem;padding:.55rem 0;border-bottom:1px solid var(--border);color:var(--text)}
+.plan-feature::before{content:'✓ ';color:var(--g500);font-weight:700}
+.btn-plan{width:100%;padding:.75rem;background:var(--g700);color:var(--white);border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.btn-plan:hover{background:var(--g900)}
+.price-card.featured .btn-plan{background:var(--gold);color:var(--g900)}
+.price-card.featured .btn-plan:hover{background:var(--gold2)}
+
+/* ══════════════════════════════════
+   ABOUT US
+══════════════════════════════════ */
+.about-section{padding:5.5rem 5%;background:var(--g900)}
+.about-grid{display:grid;grid-template-columns:1fr;gap:2rem;align-items:center;max-width:900px;margin:0 auto}
+.about-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold2);margin-bottom:.65rem}
+.about-title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--white);margin-bottom:1.25rem;line-height:1.25}
+.about-title em{color:var(--gold);font-style:italic}
+.about-body{color:rgba(255,255,255,.52);font-size:.95rem;line-height:1.8}
+.about-body p{margin-bottom:1rem}
+.about-body p:last-child{margin-bottom:0}
+.about-quote{
+  background:rgba(201,168,76,.07);border-left:3px solid var(--gold);
+  padding:1.25rem 1.5rem;border-radius:0 10px 10px 0;margin:1.5rem 0;
+  font-style:italic;color:rgba(255,255,255,.6);font-size:.92rem;line-height:1.7;
+}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.team-card{background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.15);border-radius:12px;padding:1.25rem}
+.team-id{font-size:.7rem;color:var(--gold2);font-weight:600;margin-bottom:.25rem}
+.team-name{font-weight:600;color:var(--white);font-size:.9rem}
+
+/* ══════════════════════════════════
+   GUEST TRACK SECTION
+══════════════════════════════════ */
+.track-section{padding:4rem 5%;background:var(--gold4);border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.25)}
+.track-inner{max-width:600px;margin:0 auto;text-align:center}
+.track-inner h3{font-family:'Playfair Display',serif;font-size:1.85rem;font-weight:700;color:var(--g800);margin-bottom:.6rem}
+.track-inner p{color:var(--muted);font-size:.9rem;margin-bottom:1.75rem}
+.track-form{display:flex;gap:.75rem}
+.track-input{flex:1;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:'Outfit',sans-serif;outline:none;color:var(--text)}
+.track-input:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(46,107,62,.1)}
+.btn-track{padding:.75rem 1.5rem;background:var(--g700);color:var(--white);border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;transition:background .2s}
+.btn-track:hover{background:var(--g900)}
+
+/* ══════════════════════════════════
+   FOOTER
+══════════════════════════════════ */
+footer{background:var(--dark-footer);padding:4rem 5% 0;border-top:1px solid rgba(201,168,76,.12)}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:2.5rem;padding-bottom:3rem}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--gold);letter-spacing:-.45px;margin-bottom:.75rem;line-height:1}
+.footer-logo span{color:inherit}
+.footer-tagline{color:var(--gold2);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:.75rem}
+.footer-blurb{color:rgba(255,255,255,.3);font-size:.835rem;line-height:1.7;max-width:240px}
+.footer-col h4{color:rgba(255,255,255,.3);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:.9rem}
+.footer-col a{display:block;color:rgba(255,255,255,.45);font-size:.855rem;text-decoration:none;margin-bottom:.55rem;transition:color .2s;cursor:pointer}
+.footer-col a:hover{color:var(--gold2)}
+.pay-badges{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+.pay-badge{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.3rem .75rem;font-size:.75rem;color:rgba(255,255,255,.5);font-weight:500}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding:1.5rem 0;text-align:center;color:rgba(255,255,255,.22);font-size:.78rem}
+
+/* ══════════════════════════════════
+   AUTH PAGE
+══════════════════════════════════ */
+.auth-page{background:var(--g900);min-height:100vh;display:flex;flex-direction:column}
+.auth-nav{padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.12)}
+.auth-body{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;position:relative;overflow:hidden}
+.auth-bg-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.auth-orb1{width:500px;height:500px;background:rgba(42,80,62,.35);top:-120px;right:-100px}
+.auth-orb2{width:350px;height:350px;background:rgba(201,168,76,.05);bottom:-80px;left:-80px}
+.auth-card{background:var(--white);border-radius:20px;width:100%;max-width:435px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.45);position:relative;z-index:1}
+.auth-head{background:var(--g800);padding:2rem 2.5rem 1.75rem;text-align:center;border-bottom:2px solid var(--gold)}
+.auth-head h2{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--white);margin-bottom:.3rem}
+.auth-head p{color:rgba(255,255,255,.4);font-size:.855rem}
+.auth-tabs{display:flex;background:rgba(255,255,255,.07);border-radius:8px;padding:4px;margin-top:1.15rem}
+.auth-tab{flex:1;padding:.48rem;border:none;border-radius:6px;background:none;color:rgba(255,255,255,.45);font-size:.855rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.auth-tab.active{background:var(--gold);color:var(--g900);font-weight:700}
+.auth-body-card{padding:2rem 2.5rem}
+.afield{margin-bottom:1.1rem}
+.afield label{display:block;font-size:.77rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem}
+.afield input,.afield select{width:100%;padding:.65rem .95rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:'Outfit',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color .2s}
+.afield input:focus,.afield select:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(46,107,62,.09)}
+.forgot-link{display:block;text-align:right;font-size:.78rem;color:var(--g500);text-decoration:none;margin-top:.3rem}
+.forgot-link:hover{color:var(--gold)}
+.btn-auth{width:100%;padding:.8rem;background:var(--g700);color:var(--white);border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s;margin-top:.5rem}
+.btn-auth:hover{background:var(--g900)}
+.auth-switch{text-align:center;font-size:.83rem;color:var(--muted);margin-top:.9rem}
+.auth-switch a{color:var(--g500);text-decoration:none;font-weight:600;cursor:pointer}
+.auth-switch a:hover{color:var(--gold)}
+.auth-panel{display:none}.auth-panel.active{display:block}
+
+/* ══════════════════════════════════
+   DASHBOARD SHARED
+══════════════════════════════════ */
+.dash-layout{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--g800);min-height:100vh;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;border-right:1px solid rgba(201,168,76,.1)}
+.sb-logo{padding:1.4rem 1.5rem 1rem;font-family:'Playfair Display',serif;font-size:1.64rem;font-weight:900;color:var(--gold);letter-spacing:-.55px;border-bottom:1px solid rgba(201,168,76,.1);line-height:1;text-shadow:0 2px 14px rgba(201,168,76,.12)}
+.sb-logo span{color:inherit}
+.sb-role{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.26);padding:.85rem 1.5rem .4rem}
+.sb-nav{flex:1;padding:.4rem 0}
+.sb-link{display:flex;align-items:center;gap:.7rem;padding:.68rem 1.5rem;color:rgba(255,255,255,.42);text-decoration:none;font-size:.855rem;font-weight:500;transition:all .2s;border-left:3px solid transparent;cursor:pointer}
+.sb-link:hover{color:var(--gold2);background:rgba(201,168,76,.05)}
+.sb-link.active{color:var(--gold);background:rgba(201,168,76,.1);border-left-color:var(--gold)}
+.sb-link svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.sb-footer{padding:.9rem 1.5rem;border-top:1px solid rgba(201,168,76,.1)}
+.sb-footer button{background:none;border:none;color:rgba(255,255,255,.3);font-size:.8rem;cursor:pointer;font-family:'Outfit',sans-serif}
+.sb-footer button:hover{color:var(--gold2)}
+.dash-main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+.dash-topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.dash-topbar h2{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--g800)}
+.tb-right{display:flex;align-items:center;gap:.85rem}
+.tb-notif{width:34px;height:34px;border:1.5px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .2s}
+.tb-notif:hover{border-color:var(--g500);color:var(--g500)}
+.tb-avatar{width:34px;height:34px;background:var(--g600);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--white);font-size:.78rem;font-weight:700}
+.dash-content{padding:2rem;flex:1}
+.dsection{display:none}.dsection.active{display:block}
+
+/* TILES */
+.tile-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:1.15rem;margin-bottom:2rem}
+.tile{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem}
+.tile-label{font-size:.73rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem}
+.tile-val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--g800)}
+.tile-sub{font-size:.75rem;color:var(--muted);margin-top:.15rem}
+.tile.gold-tile{background:var(--g800);border-color:rgba(201,168,76,.2)}
+.tile.gold-tile .tile-label{color:var(--gold2)}
+.tile.gold-tile .tile-val{color:var(--gold)}
+.tile.gold-tile .tile-sub{color:rgba(255,255,255,.4)}
+
+/* SEC HEAD */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.sec-head h3{font-size:.975rem;font-weight:600;color:var(--g800)}
+
+/* BUTTONS (dashboard) */
+.btn-g{padding:.42rem 1rem;background:var(--g700);color:var(--white);border:none;border-radius:6px;font-size:.815rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.btn-g:hover{background:var(--g900)}
+.btn-gold-sm{padding:.42rem 1rem;background:var(--gold);color:var(--g900);border:none;border-radius:6px;font-size:.815rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.btn-gold-sm:hover{background:var(--gold2)}
+.btn-outline-sm{padding:.42rem 1rem;background:none;color:var(--g600);border:1.5px solid var(--g600);border-radius:6px;font-size:.815rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-outline-sm:hover{background:var(--g600);color:var(--white)}
+.btn-danger-sm{padding:.42rem 1rem;background:none;color:#C0392B;border:1.5px solid #C0392B;border-radius:6px;font-size:.815rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-danger-sm:hover{background:#C0392B;color:var(--white)}
+
+/* BADGES */
+.badge{display:inline-block;padding:.18rem .62rem;border-radius:100px;font-size:.7rem;font-weight:700}
+.b-green{background:#D1FAE5;color:#065F46}
+.b-amber{background:#FEF3C7;color:#92400E}
+.b-blue{background:#DBEAFE;color:#1E40AF}
+.b-red{background:#FEE2E2;color:#991B1B}
+.b-gray{background:#F3F4F6;color:#374151}
+.b-purple{background:#EDE9FE;color:#5B21B6}
+
+/* TABLE */
+.tbl-wrap{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:.855rem}
+thead th{text-align:left;padding:.6rem 1rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--border);background:#FAFAF8}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--gold4)}
+tbody td{padding:.72rem 1rem;vertical-align:middle}
+.td-actions{display:flex;gap:.5rem;justify-content:flex-end}
+
+/* CARDS GRID */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:1.15rem;margin-bottom:1.5rem}
+.mini-svc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+.mini-svc-title{font-weight:600;font-size:.93rem;color:var(--g800);margin-bottom:.35rem}
+.mini-svc-desc{font-size:.815rem;color:var(--muted);line-height:1.55;margin-bottom:.85rem}
+
+/* ORDER CARDS */
+.order-list{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.5rem}
+.ord-card{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.ord-id{font-size:.75rem;color:var(--muted);margin-bottom:.25rem}
+.ord-name{font-weight:600;font-size:.93rem;color:var(--g800)}
+
+/* WELCOME BANNER */
+.welcome{
+  background:linear-gradient(135deg,var(--g800) 0%,var(--g700) 100%);
+  border-radius:14px;padding:1.65rem 2rem;margin-bottom:2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border:1px solid rgba(201,168,76,.18);
+}
+.welcome h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--white);margin-bottom:.25rem}
+.welcome p{color:rgba(255,255,255,.45);font-size:.855rem}
+
+/* FORM ELEMENTS */
+.field-row{display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem}
+.field-g{flex:1;min-width:150px}
+.field-g label{display:block;font-size:.77rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem}
+.field-g select,.field-g input{width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.875rem;font-family:'Outfit',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color .2s}
+.field-g select:focus,.field-g input:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(46,107,62,.09)}
+.info-block{background:var(--gold4);border:1px solid rgba(201,168,76,.3);border-left:3px solid var(--gold);border-radius:10px;padding:.95rem 1.2rem;margin-bottom:1.2rem}
+.info-block .ib-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g600);margin-bottom:.25rem}
+.info-block .ib-val{font-weight:600;font-size:.93rem;color:var(--g800)}
+.card-panel{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem}
+
+/* CHART BARS */
+.bar-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
+.bar-lbl{font-size:.78rem;color:var(--muted);width:110px;flex-shrink:0}
+.bar-track{flex:1;height:9px;background:var(--border);border-radius:100px;overflow:hidden}
+.bar-fill{height:100%;background:var(--g500);border-radius:100px}
+.bar-val{font-size:.78rem;font-weight:600;color:var(--g800);width:30px;text-align:right}
+
+/* MODALS */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:18px;padding:2rem;width:100%;max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,.25)}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--g800);margin-bottom:1.25rem}
+.modal-close{float:right;background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--muted);margin-top:-.2rem}
+.modal textarea{width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.875rem;resize:vertical;outline:none}
+.modal textarea:focus{border-color:var(--g500)}
+.stars{display:flex;gap:.35rem;margin:.65rem 0}
+.star{font-size:1.6rem;cursor:pointer;color:var(--border);transition:color .15s}
+.star.lit{color:var(--gold)}
+
+/* PROVIDER PANEL */
+.provider-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.15rem 1.3rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.7rem}
+.prov-name{font-weight:600;font-size:.93rem;color:var(--g800)}
+.prov-detail{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.hero-content>*{animation:fadeUp .65s ease both}
+.hero-content>*:nth-child(1){animation-delay:.05s}
+.hero-content>*:nth-child(2){animation-delay:.15s}
+.hero-content>*:nth-child(3){animation-delay:.28s}
+.hero-content>*:nth-child(4){animation-delay:.4s}
+.hero-visual{animation:fadeUp .7s .25s ease both}
+.dsection.active{animation:fadeUp .3s ease}
+
+/* PREVIEW BAR */
+.preview-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:var(--g900);border-top:2px solid var(--gold);
+  padding:.55rem 2rem;display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+}
+.preview-bar span{color:rgba(255,255,255,.35);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-right:.4rem}
+.pb-btn{padding:.32rem .85rem;border:1px solid rgba(201,168,76,.3);color:rgba(255,255,255,.5);background:none;border-radius:5px;font-size:.75rem;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.pb-btn:hover,.pb-btn.cur{background:var(--gold);color:var(--g900);border-color:var(--gold);font-weight:700}
+body{padding-bottom:50px}
+
+
+/* MOBILE RESPONSIVE FIXES */
+@media (max-width: 900px){
+  html,body{width:100%;overflow-x:hidden}
+  .navbar{height:auto;min-height:72px;padding:.85rem 1rem;gap:.85rem;align-items:flex-start;flex-wrap:wrap}
+  .nav-left{width:100%;display:flex;justify-content:space-between;align-items:center}
+  .nav-links{order:3;width:100%;display:flex;gap:.35rem;overflow-x:auto;padding:.2rem 0 .1rem;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links li{flex:0 0 auto}
+  .nav-links a{font-size:.82rem;padding:.48rem .7rem;border:1px solid rgba(201,168,76,.12);border-radius:999px;background:rgba(255,255,255,.035)}
+  .nav-right{width:100%;display:flex;gap:.55rem;justify-content:stretch}
+  .nav-right button{flex:1;padding:.62rem .75rem;font-size:.84rem}
+  .logo{font-size:1.62rem}
+  .hero{padding:8.25rem 1.05rem 3.5rem;min-height:auto}
+  .hero-grid{grid-template-columns:1fr;gap:2.2rem}
+  .hero-copy{text-align:left}
+  .hero-title{font-size:clamp(2.15rem,12vw,3.2rem);line-height:1.02;letter-spacing:-1.5px}
+  .hero-sub{font-size:.98rem;max-width:100%}
+  .hero-cta{display:grid;grid-template-columns:1fr;gap:.8rem;width:100%}
+  .btn-hero{width:100%;justify-content:center;padding:.95rem 1rem}
+  .hero-card{padding:1.15rem;border-radius:20px;transform:none!important;max-width:100%}
+  section,.services-section,.pricing-section,.about-section,.track-section{padding-left:1rem!important;padding-right:1rem!important}
+  .section-title,.about-title{font-size:clamp(2rem,9vw,2.7rem)}
+  .section-sub{font-size:.95rem}
+  .svcs-grid,.pricing-grid,.stats-grid,.analytics-grid,.mini-svcs{grid-template-columns:1fr!important}
+  .svc-card,.price-card,.card-panel{padding:1.15rem;border-radius:18px}
+  .track-box{padding:1rem;flex-direction:column;align-items:stretch;border-radius:18px}
+  .track-input{width:100%;min-width:0}
+  .footer-grid{grid-template-columns:1fr!important;gap:1.75rem}
+  .auth-wrap{grid-template-columns:1fr;min-height:auto;padding:7rem 1rem 3rem}
+  .auth-info{display:none}
+  .auth-card{width:100%;padding:1.2rem;border-radius:18px}
+  .form-row{grid-template-columns:1fr!important}
+  .dash-layout{grid-template-columns:1fr;min-height:auto}
+  .sidebar{position:relative;width:100%;height:auto;min-height:auto;border-right:none;border-bottom:1px solid rgba(201,168,76,.12)}
+  .sb-logo{font-size:1.5rem;padding:1rem 1rem .8rem;text-align:left}
+  .sb-nav{display:flex;gap:.45rem;overflow-x:auto;padding:.75rem 1rem;scrollbar-width:none}
+  .sb-nav::-webkit-scrollbar{display:none}
+  .sb-link{flex:0 0 auto;white-space:nowrap;padding:.72rem .85rem;border-radius:999px;font-size:.82rem}
+  .sb-link svg{width:16px;height:16px}
+  .main-area{margin-left:0;padding:1rem;min-width:0}
+  .topbar-d{position:sticky;top:0;z-index:20;margin:-1rem -1rem 1rem;padding:1rem;display:flex;gap:.85rem;align-items:flex-start;flex-direction:column}
+  .topbar-d h2{font-size:1.45rem}
+  .dash-grid{grid-template-columns:1fr!important;gap:1rem}
+  .tile{padding:1rem;border-radius:16px}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:16px}
+  table{min-width:680px}
+  .td-actions{flex-wrap:wrap}
+  .modal-box{width:calc(100vw - 2rem);padding:1rem;border-radius:18px}
+  .preview-bar{left:.6rem;right:.6rem;bottom:.6rem;width:auto;max-width:none;padding:.45rem;justify-content:flex-start;overflow-x:auto;border-radius:999px;scrollbar-width:none}
+  .preview-bar::-webkit-scrollbar{display:none}
+  .preview-bar span{display:none}
+  .pb-btn{flex:0 0 auto;padding:.55rem .75rem;font-size:.75rem}
+  body{padding-bottom:68px}
+}
+@media (max-width: 480px){
+  .navbar{padding:.75rem .85rem}
+  .hero{padding-top:9rem}
+  .hero-title{font-size:2.35rem}
+  .badge-hero{font-size:.72rem;padding:.45rem .7rem}
+  .section-label,.about-label{font-size:.72rem}
+  .price-card.featured{transform:none}
+  .plan-price{font-size:2.35rem}
+  .main-area{padding:.85rem}
+  .topbar-d{margin:-.85rem -.85rem .85rem;padding:.85rem}
+  .sb-logo{padding:.95rem .85rem .65rem}
+  .sb-nav{padding:.65rem .85rem}
+  .card-panel,.svc-card,.price-card,.tile{padding:1rem}
+  .btn-g,.btn-plan,.btn-outline,.btn-outline-sm,.btn-danger-sm{min-height:42px}
+}
+
+
+
+/* =========================================================
+   HERO MOTTO + CENTER ALIGNMENT PATCH
+   ========================================================= */
+.hero{
+  grid-template-columns: minmax(0, 920px);
+  justify-content: center;
+  text-align: center;
+  padding-top: 6.25rem;
+  padding-bottom: 6.25rem;
+}
+.hero-content{
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero-motto{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold2);
+  font-size: clamp(1rem, 2.1vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: .18em;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 0 auto 1.65rem;
+  padding: .62rem 1.2rem;
+  border-top: 1px solid rgba(201,168,76,.32);
+  border-bottom: 1px solid rgba(201,168,76,.32);
+  text-shadow: 0 3px 18px rgba(201,168,76,.18);
+}
+.hero-sub{margin-left:auto;margin-right:auto;max-width:640px}
+.hero-cta{justify-content:center}
+.hero-visual{display:none}
+
+@media (max-width: 768px){
+  .hero{
+    grid-template-columns: 1fr;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 1rem 4.25rem;
+  }
+  .hero-content{align-items:center;max-width:100%}
+  .hero-motto{
+    font-size: clamp(.95rem, 4.8vw, 1.25rem);
+    letter-spacing: .12em;
+    padding: .55rem .75rem;
+    margin-bottom: 1.35rem;
+  }
+  .hero h1{text-align:center}
+  .hero-sub{text-align:center}
+  .hero-cta{width:100%}
+}
+
+
+
+/* =========================================================
+   FINAL RESPONSIVE NAV PATCH — uses actual .topnav markup
+   Fixes cramped mobile navbar and single auth button sizing
+   ========================================================= */
+.nav-auth-btn{white-space:nowrap;min-width:132px;text-align:center}
+@media (max-width: 900px){
+  .topnav{
+    height:auto;
+    min-height:64px;
+    padding:.72rem 1rem .82rem;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "logo action"
+      "links links";
+    align-items:center;
+    gap:.62rem .75rem;
+  }
+  .topnav .logo{grid-area:logo;font-size:1.55rem;min-width:0}
+  .topnav .nav-right{grid-area:action;width:auto;display:flex;justify-content:flex-end;gap:0}
+  .topnav .nav-right button{width:auto;padding:.58rem .9rem;font-size:.82rem;border-radius:999px;box-shadow:none}
+  .topnav .nav-links{
+    grid-area:links;
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    overflow-x:auto;
+    padding:.08rem 0 .12rem;
+    list-style:none;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .topnav .nav-links::-webkit-scrollbar{display:none}
+  .topnav .nav-links li{flex:0 0 auto}
+  .topnav .nav-links a{
+    display:block;
+    white-space:nowrap;
+    font-size:.8rem;
+    padding:.46rem .72rem;
+    border:1px solid rgba(201,168,76,.18);
+    border-radius:999px;
+    background:rgba(255,255,255,.035);
+    color:rgba(255,255,255,.72);
+  }
+  .hero{padding-top:4.4rem}
+  .statsbar{grid-template-columns:1fr 1fr;gap:1.2rem;padding:1.8rem 1rem}
+  .stat-divider{display:none}
+  .steps{grid-template-columns:1fr;gap:1.6rem}
+  .steps::before{display:none}
+  .pricing-grid{grid-template-columns:1fr}
+  .track-form{flex-direction:column}
+  .dash-main{margin-left:0}
+  .dash-content{padding:1rem}
+  .dash-topbar{padding:0 1rem}
+  .ord-card,.provider-card,.welcome{align-items:flex-start;flex-direction:column}
+  .welcome .btn-gold-sm{width:100%}
+}
+@media (max-width: 420px){
+  .topnav{padding:.68rem .82rem .78rem;gap:.55rem}
+  .topnav .logo{font-size:1.42rem}
+  .topnav .nav-right button{padding:.52rem .72rem;font-size:.78rem;min-width:116px}
+  .topnav .nav-links a{font-size:.76rem;padding:.42rem .62rem}
+  .hero{padding-top:3.6rem}
+}
+
+</style>
+</head>
+<body>
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 1 — HOME
+══════════════════════════════════════════════════════ -->
+<div class="page active" id="pg-home">
+
+<nav class="topnav">
+  <div class="logo" onclick="goPage('pg-home')">Raab<span>ta</span></div>
+  <ul class="nav-links">
+    <li><a onclick="scrollToSection('about-anchor')">About Us</a></li>
+    <li><a onclick="scrollToSection('services-anchor')">Services</a></li>
+    <li><a onclick="scrollToSection('pricing-anchor')">Pricing</a></li>
+  </ul>
+  <div class="nav-right">
+ <button class="btn-gold nav-auth-btn" onclick="goPage('pg-auth');authTab('login',null)">Login / Sign Up</button>
+ </div>
+</nav>
+
+<!-- HERO -->
+<section class="hero">
+  <div class="hero-content">
+    <div class="hero-tagline hero-motto">Your Helping Hand in Pakistan</div>
+<h1>Services back home, <em>handled for you.</em></h1>
+    <p class="hero-sub">Whether you're abroad or simply too busy — Raabta connects you to trusted service providers across Pakistan. Bill payments, maintenance, elderly care, and more. All on one platform.</p>
+    <div class="hero-cta">
+      <button class="btn-hero" onclick="goPage('pg-auth')">Get Started Free</button>
+      <button class="btn-hero-ghost" onclick="scrollToSection('services-anchor')">Explore Services ↓</button>
+    </div>
+  </div>
+  <div class="hero-visual">
+    <div class="card-stack">
+      <div class="hcard hcard-a">
+        <div class="hcard-tag">Active Order</div>
+        <div class="hcard-name">Home Maintenance — Lahore</div>
+        <span class="badge b-blue">● In Progress</span>
+        <div class="hdivider"></div>
+        <div class="hrow"><span>#ORD-4821</span><strong>Today, 2:30 PM</strong></div>
+      </div>
+      <div class="hcard hcard-b">
+        <div class="hcard-tag">New Request</div>
+        <div class="hcard-name">Bill Payment — LESCO</div>
+        <span class="badge b-amber">◐ Assigned</span>
+        <div class="hdivider"></div>
+        <div class="hrow"><span>#ORD-4822</span><strong>Provider notified</strong></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- STATS -->
+<section class="statsbar">
+  <div><div class="stat-num">12K+</div><div class="stat-lbl">Orders Completed</div></div>
+  <div class="stat-divider"></div>
+  <div><div class="stat-num">800+</div><div class="stat-lbl">Verified Providers</div></div>
+  <div class="stat-divider"></div>
+  <div><div class="stat-num">88%</div><div class="stat-lbl">Would Recommend</div></div>
+  <div class="stat-divider"></div>
+  <div><div class="stat-num">4.8★</div><div class="stat-lbl">Average Rating</div></div>
+</section>
+
+<!-- SERVICES -->
+<section class="services-section" id="services-anchor">
+  <div class="section-header">
+    <div class="section-label">What We Offer</div>
+    <h2 class="section-title">Services on the Platform</h2>
+    <p class="section-sub">The services Pakistanis abroad need most — handled by trusted local providers through one simple platform.</p>
+  </div>
+  <div class="svcs-grid">
+    <div class="svc-card">
+      <div class="svc-icon">🏦</div>
+      <div class="svc-title">Bill Payments & Banking</div>
+      <div class="svc-desc">LESCO, SNGPL, PTCL, water bills — paid on your behalf. Bank errands handled by verified agents.</div>
+      <span class="svc-tag">Most Requested — 82%</span>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">🔧</div>
+      <div class="svc-title">Home Maintenance & Repair</div>
+      <div class="svc-desc">Plumbing, electrical, carpentry, AC servicing — certified technicians assigned and supervised.</div>
+      <span class="svc-tag">71% of users need this</span>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">📦</div>
+      <div class="svc-title">Delivery & Logistics</div>
+      <div class="svc-desc">Documents, packages, and items delivered across the city with real order tracking.</div>
+      <span class="svc-tag">65% demand</span>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">🏥</div>
+      <div class="svc-title">Elderly Care & Support</div>
+      <div class="svc-desc">Companion visits, medication pickups, doctor accompaniment — care for parents you can't be there for.</div>
+      <span class="svc-tag">Underserved — 48%</span>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">⚖️</div>
+      <div class="svc-title">Legal Assistance</div>
+      <div class="svc-desc">Property matters, documentation, affidavits, and legal consultations handled by licensed professionals.</div>
+      <span class="svc-tag">35% demand</span>
+    </div>
+    <div class="svc-card">
+      <div class="svc-icon">🎨</div>
+      <div class="svc-title">Renovation & Painting</div>
+      <div class="svc-desc">Interior and exterior painters, renovation teams — supervised and tracked from placement to completion.</div>
+      <span class="svc-tag">Available now</span>
+    </div>
+ <div class="svc-card"><div class="svc-icon">🎉</div><div class="svc-title">Event Planning</div><div class="svc-desc">Birthdays, family gatherings, venue coordination, catering support, and on-ground arrangements handled locally.</div><span class="svc-tag">New service</span></div>
+ <div class="svc-card"><div class="svc-icon">🤲</div><div class="svc-title">Charity & Donations</div><div class="svc-desc">Coordinate verified charity deliveries, ration drives, donations, and community support tasks with proof of completion.</div><span class="svc-tag">Community support</span></div>
+ <div class="svc-card"><div class="svc-icon">🛍️</div><div class="svc-title">Shopping Assistance</div><div class="svc-desc">Groceries, gifts, household items, and local purchases arranged and delivered for your family back home.</div><span class="svc-tag">Everyday help</span></div>
+ <div class="svc-card"><div class="svc-icon">✨</div><div class="svc-title">Others / Miscellaneous</div><div class="svc-desc">Have a custom request that does not fit a category? Submit it and a supervisor will review the best way to help.</div><span class="svc-tag">Custom requests</span></div>
+  </div>
+</section>
+
+<!-- HOW IT WORKS -->
+<section class="how-section">
+  <div class="section-header">
+    <div class="section-label">Simple Process</div>
+    <h2 class="section-title">How Raabta Works</h2>
+    <p class="section-sub">No account needed to start. Place your first request as a guest in under two minutes.</p>
+  </div>
+  <div class="steps">
+    <div class="step"><div class="step-num">1</div><div class="step-title">Place a Request</div><div class="step-desc">Choose a service. No login required — guest orders are fully supported.</div></div>
+    <div class="step"><div class="step-num">2</div><div class="step-title">Get Your Order ID</div><div class="step-desc">System confirms your order and issues a unique Order ID instantly.</div></div>
+    <div class="step"><div class="step-num">3</div><div class="step-title">Supervisor Assigns</div><div class="step-desc">A Raabta supervisor contacts and assigns a verified local provider.</div></div>
+    <div class="step"><div class="step-num">4</div><div class="step-title">Track & Review</div><div class="step-desc">Follow status in real time — Requested → Assigned → In Progress → Completed.</div></div>
+  </div>
+</section>
+
+<!-- GUEST ORDER TRACKING -->
+<section class="track-section" id="track-anchor">
+  <div class="track-inner">
+    <h3>Track Your Order</h3>
+    <p>Already placed an order? Enter your Order ID below — no login required.</p>
+    <div class="track-form">
+      <input class="track-input" placeholder="Enter Order ID e.g. ORD-4821" id="track-input"/>
+      <button class="btn-track" onclick="trackOrder()">Track →</button>
+    </div>
+  </div>
+</section>
+
+<!-- PRICING -->
+<section class="pricing-section" id="pricing-anchor">
+ <div class="section-header"><div class="section-label">Pricing</div><h2 class="section-title">Simple, Transparent Pricing</h2><p class="section-sub">Start with your first basic order free, then pay only when you need a service. Upgrade for monthly priority support.</p></div>
+ <div class="pricing-grid">
+ <div class="price-card"><div class="plan-name">Basic</div><div class="plan-price">Free<span> first order</span></div><div class="plan-desc">Your first basic order is free. After that, basic orders are charged per request.</div><ul class="plan-features"><li class="plan-feature">First basic order free</li><li class="plan-feature">$19 per basic order after the first order</li><li class="plan-feature">Guest order placement</li><li class="plan-feature">Order ID tracking</li><li class="plan-feature">Standard assignment queue</li></ul><button class="btn-plan" onclick="goPage('pg-auth')">Start Free</button></div>
+ <div class="price-card featured"><div class="featured-badge">Popular</div><div class="plan-name">Complex Order</div><div class="plan-price">$39<span> / order</span></div><div class="plan-desc">For larger requests that need extra coordination, supervision, or provider matching.</div><ul class="plan-features"><li class="plan-feature">Complex service requests</li><li class="plan-feature">Supervisor coordination included</li><li class="plan-feature">Verified local providers</li><li class="plan-feature">Full order status tracking</li><li class="plan-feature">Support for multi-step tasks</li></ul><button class="btn-plan" onclick="goPage('pg-auth')">Place Complex Order</button></div>
+ <div class="price-card"><div class="plan-name">Premium Subscription</div><div class="plan-price">$99<span> / month</span></div><div class="plan-desc">For families or businesses needing ongoing, priority support in Pakistan every month.</div><ul class="plan-features"><li class="plan-feature">Priority supervisor assignment</li><li class="plan-feature">Dedicated support contact</li><li class="plan-feature">Premium order tracking dashboard</li><li class="plan-feature">Provider reports and ratings</li><li class="plan-feature">Early access to new services</li></ul><button class="btn-plan" onclick="goPage('pg-auth')">Get Premium</button></div>
+ </div><p style="text-align:center;font-size:.8rem;color:var(--muted);margin-top:1.5rem">Payments accepted in USD. No hidden charges.</p>
+</section>
+
+<!-- ABOUT US -->
+<section class="about-section" id="about-anchor">
+ <div class="about-grid"><div><div class="about-label">Our Story</div><h2 class="about-title">Born from a real problem, <em>built for everyone.</em></h2><div class="about-body"><p>It started with a friendship. When Muhammad's best friend left Pakistan for Italy to pursue his studies, the distance didn't make the responsibilities back home disappear — if anything, they multiplied.</p><div class="about-quote">"Every few days, another call. 'Yaar, can you pay the LESCO bill?' 'Can you check on my mother?' 'The plumber never showed up.' It was manageable at first — until it wasn't."</div><p>Muhammad was happy to help. But he was also a student, with his own life to manage. And as he looked around, he realized this wasn't just his friend's problem — it was the story of millions of Pakistanis abroad, silently depending on people back home to keep things running.</p><p>That realization became Raabta. A platform where the distance doesn't matter, where a request placed from London or Dubai gets handled in Lahore or Islamabad — professionally, transparently, and on time.</p></div></div></div>
+</section>
+<!-- FOOTER -->
+<footer>
+  <div class="footer-grid">
+    <div>
+      <div class="footer-logo">Raab<span>ta</span></div>
+      <div class="footer-tagline">Your Helping Hand in Pakistan</div>
+      <p class="footer-blurb">Connecting overseas Pakistanis and busy families to trusted service providers — reliably, transparently, on time.</p>
+      <div class="pay-badges" style="margin-top:1rem">
+        <div class="pay-badge">JazzCash</div>
+        <div class="pay-badge">EasyPaisa</div>
+        <div class="pay-badge">Bank Transfer</div>
+      </div>
+    </div>
+    <div class="footer-col">
+      <h4>Services</h4>
+      <a>Bill Payments</a>
+      <a>Home Maintenance</a>
+      <a>Elderly Care</a>
+      <a>Legal Assistance</a>
+      <a>Delivery</a>
+ <a>Event Planning</a>
+ <a>Charity & Donations</a>
+ <a>Shopping Assistance</a>
+ <a>Others / Miscellaneous</a>
+    </div>
+    <div class="footer-col">
+      <h4>Company</h4>
+      <a onclick="scrollToSection('about-anchor')">About Us</a>
+      <a>Contact</a>
+      <a>Careers</a>
+      <a>Privacy Policy</a>
+    </div>
+    <div class="footer-col">
+      <h4>Account</h4>
+      <a onclick="goPage('pg-auth');authTab('login',null)">Login / Sign Up</a>
+      <a onclick="scrollToSection('track-anchor')">Track Order</a>
+      <a onclick="scrollToSection('pricing-anchor')">View Plans</a>
+ <a onclick="goPage('pg-customer');setTimeout(function(){cShow('c-complaints',null)},80)">Complaints</a>
+    </div>
+  </div>
+  <div class="footer-bottom">© 2025 Raabta — raabtapk.com · All rights reserved.</div>
+</footer>
+</div><!-- /home -->
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 2 — AUTH
+══════════════════════════════════════════════════════ -->
+<div class="page" id="pg-auth">
+<div class="auth-page">
+  <div class="auth-nav">
+    <div class="logo" onclick="goPage('pg-home')" style="cursor:pointer">Raab<span style="color:var(--gold)">ta</span></div>
+    <button onclick="goPage('pg-home')" style="background:none;border:none;color:rgba(255,255,255,.35);font-size:.85rem;cursor:pointer;font-family:'Outfit',sans-serif">← Back to Home</button>
+  </div>
+  <div class="auth-bg-orb auth-orb1"></div>
+  <div class="auth-bg-orb auth-orb2"></div>
+  <div class="auth-body">
+    <div class="auth-card">
+      <div class="auth-head">
+        <h2 id="auth-heading">Welcome Back</h2>
+        <p id="auth-sub">Sign in to your Raabta account</p>
+        <div class="auth-tabs">
+          <button class="auth-tab active" onclick="authTab('login',this)">Log In</button>
+          <button class="auth-tab" onclick="authTab('signup',this)">Sign Up</button>
+        </div>
+      </div>
+      <div class="auth-body-card">
+        <!-- LOGIN -->
+        <div class="auth-panel active" id="ap-login">
+          <div class="afield"><label>Email Address</label><input type="email" placeholder="you@example.com"/></div>
+          <div class="afield"><label>Password</label><input type="password" placeholder="••••••••"/><a href="#" class="forgot-link">Forgot Password?</a></div>
+          <button class="btn-auth" onclick="authLogin()">Log In →</button>
+          <div class="auth-switch">No account? <a onclick="authTab('signup',null)">Sign up free</a></div>
+        </div>
+        <!-- SIGNUP -->
+        <div class="auth-panel" id="ap-signup">
+          <div class="afield"><label>Full Name</label><input type="text" placeholder="Ahmed Khan"/></div>
+          <div class="afield"><label>Email Address</label><input type="email" placeholder="you@example.com"/></div>
+          <div class="afield"><label>Password</label><input type="password" placeholder="Minimum 8 characters"/></div>
+          <div class="afield"><label>I am a…</label>
+            <select id="su-role">
+              <option value="">Select your role</option>
+              <option value="customer">Customer</option>
+              <option value="admin">Admin</option>
+              <option value="supervisor">Supervisor</option>
+            </select>
+          </div>
+          <button class="btn-auth" onclick="authSignup()">Create Account →</button>
+          <div class="auth-switch">Have an account? <a onclick="authTab('login',null)">Log in</a></div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 3 — CUSTOMER DASHBOARD
+══════════════════════════════════════════════════════ -->
+<div class="page" id="pg-customer">
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sb-logo">Raab<span>ta</span></div>
+    <div class="sb-role">Customer</div>
+    <div class="sb-nav">
+      <div class="sb-link active" onclick="cShow('c-dash',this)"><svg viewBox="0 0 24 24"><rect x="3" y="3" width="7" height="7"/><rect x="14" y="3" width="7" height="7"/><rect x="3" y="14" width="7" height="7"/><rect x="14" y="14" width="7" height="7"/></svg>Dashboard</div>
+      <div class="sb-link" onclick="cShow('c-neworder',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><line x1="12" y1="8" x2="12" y2="16"/><line x1="8" y1="12" x2="16" y2="12"/></svg>New Order</div>
+      <div class="sb-link" onclick="cShow('c-services',this)"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Services</div>
+      <div class="sb-link" onclick="cShow('c-history',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>Order History</div>
+      <div class="sb-link" onclick="cShow('c-plans',this)"><svg viewBox="0 0 24 24"><rect x="2" y="3" width="20" height="14" rx="2"/><line x1="8" y1="21" x2="16" y2="21"/><line x1="12" y1="17" x2="12" y2="21"/></svg>My Plan</div>
+      <div class="sb-link" onclick="cShow('c-complaints',this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/><line x1="8" y1="9" x2="16" y2="9"/><line x1="8" y1="13" x2="14" y2="13"/></svg>Complaints</div>
+ <div class="sb-link" onclick="cShow('c-profile',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a8 8 0 0 1 16 0v1"/></svg>Profile</div>
+    </div>
+    <div class="sb-footer"><button onclick="goPage('pg-home')">← Back to Home</button></div>
+  </aside>
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <h2 id="c-title">Dashboard</h2>
+      <div class="tb-right">
+        <div class="tb-notif"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <div class="tb-avatar">AK</div>
+      </div>
+    </div>
+    <div class="dash-content">
+
+      <!-- DASHBOARD HOME -->
+      <div class="dsection active" id="c-dash">
+        <div class="welcome"><div><h2>Good afternoon, Ahmed 👋</h2><p>You have 2 active orders. Your Basic plan is active.</p></div><button class="btn-gold-sm" onclick="cShow('c-neworder',null)">+ New Order</button></div>
+        <div class="tile-row">
+          <div class="tile"><div class="tile-label">Active Orders</div><div class="tile-val">2</div><div class="tile-sub">In progress now</div></div>
+          <div class="tile"><div class="tile-label">Completed</div><div class="tile-val">14</div><div class="tile-sub">All time</div></div>
+          <div class="tile"><div class="tile-label">Avg. Rating</div><div class="tile-val">4.7</div><div class="tile-sub">Stars given</div></div>
+          <div class="tile gold-tile"><div class="tile-label">Plan</div><div class="tile-val">Basic</div><div class="tile-sub">First order free, then $19/basic order</div></div>
+        </div>
+        <div class="sec-head"><h3>Active Orders</h3><button class="btn-outline-sm" onclick="cShow('c-history',null)">View All</button></div>
+        <div class="order-list">
+          <div class="ord-card"><div><div class="ord-id">#ORD-4821</div><div class="ord-name">Home Maintenance — Plumbing</div></div><span class="badge b-blue">In Progress</span><button class="btn-outline-sm">Track</button></div>
+          <div class="ord-card"><div><div class="ord-id">#ORD-4822</div><div class="ord-name">Bill Payment — LESCO</div></div><span class="badge b-amber">Assigned</span><button class="btn-outline-sm">Track</button></div>
+        </div>
+        <div style="background:var(--gold4);border:1px solid rgba(201,168,76,.25);border-radius:12px;padding:1.25rem;font-size:.855rem;color:var(--g700)">
+          <strong>💡 Tip:</strong> Once an order is completed, you can rate your service provider from Order History. Ratings help supervisors assign the best providers to future requests.
+        </div>
+      </div>
+
+      <!-- NEW ORDER -->
+      <div class="dsection" id="c-neworder">
+        <div class="sec-head"><h3>Create a New Order</h3></div>
+        <div class="card-panel" style="max-width:520px">
+          <div class="field-g" style="margin-bottom:1rem"><label>Select Service</label>
+            <select><option>Choose a service…</option><option>Bill Payments & Banking</option><option>Home Maintenance & Repair</option><option>Delivery & Logistics</option><option>Elderly Care & Support</option><option>Legal Assistance</option><option>Renovation & Painting</option><option>Event Planning</option><option>Charity & Donations</option><option>Shopping Assistance</option><option>Others / Miscellaneous</option></select>
+          </div>
+          <div class="field-g" style="margin-bottom:1rem"><label>Your Location (City)</label><input type="text" placeholder="e.g. Lahore, Islamabad…"/></div>
+          <div class="field-g" style="margin-bottom:1rem"><label>Preferred Date & Time</label><input type="text" placeholder="e.g. Tomorrow, 10:00 AM"/></div>
+          <div class="field-g" style="margin-bottom:1.25rem"><label>Additional Notes</label><textarea style="width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.875rem;height:88px;display:block;box-sizing:border-box;outline:none" placeholder="Any specific instructions, address details…"></textarea></div>
+          <button class="btn-g" style="width:100%;padding:.72rem" onclick="alert('✅ Order submitted! A supervisor will review and assign a provider. You'll receive your Order ID shortly.')">Submit Order</button>
+        </div>
+      </div>
+
+      <!-- SERVICES -->
+      <div class="dsection" id="c-services">
+        <div class="sec-head"><h3>Available Services</h3></div>
+        <div class="card-grid">
+          <div class="mini-svc"><div class="mini-svc-title">🏦 Bill Payments & Banking</div><div class="mini-svc-desc">Utility bills, bank errands, CNIC renewals handled by verified agents.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+          <div class="mini-svc"><div class="mini-svc-title">🔧 Home Maintenance</div><div class="mini-svc-desc">Plumbing, electrical, carpentry, AC — certified technicians nationwide.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+          <div class="mini-svc"><div class="mini-svc-title">📦 Delivery & Logistics</div><div class="mini-svc-desc">Same-day and scheduled deliveries across major cities.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+          <div class="mini-svc"><div class="mini-svc-title">🏥 Elderly Care</div><div class="mini-svc-desc">Companion visits, medication pickups, doctor accompaniment for parents.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+          <div class="mini-svc"><div class="mini-svc-title">⚖️ Legal Assistance</div><div class="mini-svc-desc">Property matters, documents, affidavits by licensed professionals.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+          <div class="mini-svc"><div class="mini-svc-title">🎨 Renovation & Painting</div><div class="mini-svc-desc">Interior and exterior painting, renovation teams, supervised delivery.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+ <div class="mini-svc"><div class="mini-svc-title">🎉 Event Planning</div><div class="mini-svc-desc">Venue, catering, decor, and coordination for family events back home.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+ <div class="mini-svc"><div class="mini-svc-title">🤲 Charity & Donations</div><div class="mini-svc-desc">Arrange verified donations, ration drives, and community support tasks.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+ <div class="mini-svc"><div class="mini-svc-title">🛍️ Shopping Assistance</div><div class="mini-svc-desc">Groceries, gifts, household items, and local purchases delivered reliably.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+ <div class="mini-svc"><div class="mini-svc-title">✨ Others / Miscellaneous</div><div class="mini-svc-desc">Submit a custom request and a supervisor will review it.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+        </div>
+      </div>
+
+      <!-- ORDER HISTORY -->
+      <div class="dsection" id="c-history">
+        <div class="sec-head"><h3>Order History</h3></div>
+        <div class="tbl-wrap"><table>
+          <thead><tr><th>Order ID</th><th>Service</th><th>Date</th><th>Status</th><th style="text-align:right">Action</th></tr></thead>
+          <tbody>
+            <tr><td><strong>#ORD-4820</strong></td><td>Electrical Work</td><td>Apr 28, 2026</td><td><span class="badge b-green">Completed</span></td><td style="text-align:right"><button class="btn-gold-sm" onclick="openRate()">Rate</button></td></tr>
+            <tr><td><strong>#ORD-4819</strong></td><td>Bill Payment</td><td>Apr 20, 2026</td><td><span class="badge b-green">Completed</span></td><td style="text-align:right"><button class="btn-gold-sm" onclick="openRate()">Rate</button></td></tr>
+            <tr><td><strong>#ORD-4821</strong></td><td>Home Maintenance</td><td>Today</td><td><span class="badge b-blue">In Progress</span></td><td style="text-align:right"><span style="font-size:.78rem;color:var(--muted)">Awaiting completion</span></td></tr>
+            <tr><td><strong>#ORD-4822</strong></td><td>Bill Payment — LESCO</td><td>Today</td><td><span class="badge b-amber">Assigned</span></td><td style="text-align:right"><span style="font-size:.78rem;color:var(--muted)">Provider notified</span></td></tr>
+          </tbody>
+        </table></div>
+      </div>
+
+      <!-- MY PLAN -->
+      <div class="dsection" id="c-plans">
+        <div class="sec-head"><h3>My Plan</h3></div>
+        <div style="display:grid;grid-template-columns:1fr 1.5fr;gap:1.5rem;margin-bottom:1.5rem">
+          <div class="card-panel" style="background:var(--g800);border-color:rgba(201,168,76,.2)">
+            <div style="font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--gold2);margin-bottom:.5rem">Active Plan</div>
+            <div style="font-family:'Playfair Display',serif;font-size:1.8rem;font-weight:800;color:var(--gold)">Standard</div>
+            <div style="font-size:.855rem;color:rgba(255,255,255,.45);margin:.4rem 0 1rem">First basic order free · Then $19/order</div>
+            <div style="font-size:.825rem;color:rgba(255,255,255,.55)">Orders used: <strong style="color:var(--gold2)">7 / 15</strong> this month</div>
+            <div style="margin-top:.65rem;height:6px;background:rgba(255,255,255,.1);border-radius:100px;overflow:hidden"><div style="width:47%;height:100%;background:var(--gold);border-radius:100px"></div></div>
+          </div>
+          <div class="card-panel">
+            <div class="sec-head" style="margin-bottom:.85rem"><h3>Upgrade to Premium</h3></div>
+            <p style="font-size:.855rem;color:var(--muted);margin-bottom:1.1rem">Get priority support, a dedicated support contact, and premium tracking for $99/month.</p>
+            <button class="btn-gold-sm" onclick="alert('Upgrade flow would go here.')">Upgrade Plan →</button>
+          </div>
+        </div>
+      </div>
+
+      <!-- COMPLAINTS -->
+ <div class="dsection" id="c-complaints"><div class="sec-head"><h3>Submit a Complaint</h3></div><div class="card-panel" style="max-width:560px"><p style="font-size:.855rem;color:var(--muted);margin-bottom:1.15rem">Tell us what went wrong. A supervisor will review your complaint and follow up.</p><div class="field-g" style="margin-bottom:1rem"><label>Order ID</label><input id="complaint-order" type="text" placeholder="e.g. ORD-4821"/></div><div class="field-g" style="margin-bottom:1rem"><label>Complaint Type</label><select id="complaint-type"><option value="">Select a complaint type…</option><option>Provider was late</option><option>Service quality issue</option><option>Wrong service provided</option><option>Payment issue</option><option>Other</option></select></div><div class="field-g" style="margin-bottom:1.25rem"><label>Details</label><textarea id="complaint-details" style="width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.875rem;height:105px;display:block;box-sizing:border-box;outline:none" placeholder="Briefly explain the issue…"></textarea></div><button class="btn-g" style="width:100%;padding:.72rem" onclick="submitComplaint()">Submit Complaint</button></div><div class="sec-head" style="margin-top:1.5rem"><h3>Recent Complaints</h3></div><div class="tbl-wrap" style="max-width:760px"><table><thead><tr><th>Complaint ID</th><th>Order ID</th><th>Type</th><th>Status</th></tr></thead><tbody id="complaint-list"><tr><td><strong>CMP-012</strong></td><td>#ORD-4818</td><td>Provider was late</td><td><span class="badge b-amber">Open</span></td></tr></tbody></table></div></div>
+ <!-- PROFILE -->
+      <div class="dsection" id="c-profile">
+        <div class="sec-head"><h3>My Profile</h3></div>
+        <div class="card-panel" style="max-width:480px">
+          <div class="field-g" style="margin-bottom:1rem"><label>Full Name</label><input type="text" value="Ahmed Khan"/></div>
+          <div class="field-g" style="margin-bottom:1rem"><label>Email</label><input type="email" value="ahmed@example.com"/></div>
+          <div class="field-g" style="margin-bottom:1rem"><label>Phone / WhatsApp</label><input type="text" value="+92 300 1234567"/></div>
+          <div class="field-g" style="margin-bottom:1.25rem"><label>Default City</label><input type="text" value="Lahore"/></div>
+          <button class="btn-g" style="padding:.72rem 2rem" onclick="alert('Profile saved!')">Save Changes</button>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 4 — ADMIN DASHBOARD
+══════════════════════════════════════════════════════ -->
+<div class="page" id="pg-admin">
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sb-logo">Raab<span>ta</span></div>
+    <div class="sb-role">Admin</div>
+    <div class="sb-nav">
+      <div class="sb-link active" onclick="aShow('a-services',this)"><svg viewBox="0 0 24 24"><path d="M21 16V8a2 2 0 0 0-1-1.73l-7-4a2 2 0 0 0-2 0l-7 4A2 2 0 0 0 3 8v8a2 2 0 0 0 1 1.73l7 4a2 2 0 0 0 2 0l7-4A2 2 0 0 0 21 16z"/></svg>Services</div>
+      <div class="sb-link" onclick="aShow('a-analytics',this)"><svg viewBox="0 0 24 24"><line x1="18" y1="20" x2="18" y2="10"/><line x1="12" y1="20" x2="12" y2="4"/><line x1="6" y1="20" x2="6" y2="14"/></svg>Analytics</div>
+      <div class="sb-link" onclick="aShow('a-users',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M23 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>Users</div>
+      <div class="sb-link" onclick="aShow('a-logs',this)"><svg viewBox="0 0 24 24"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>Activity Logs</div>
+      <div class="sb-link" onclick="aShow('a-complaints',this)"><svg viewBox="0 0 24 24"><path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z"/></svg>Complaints</div>
+    </div>
+    <div class="sb-footer"><button onclick="goPage('pg-home')">← Back to Home</button></div>
+  </aside>
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <h2 id="a-title">Services</h2>
+      <div class="tb-right"><div class="tb-notif"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="tb-avatar">AD</div></div>
+    </div>
+    <div class="dash-content">
+
+      <!-- SERVICES -->
+      <div class="dsection active" id="a-services">
+        <div class="sec-head"><h3>All Services</h3><button class="btn-gold-sm" onclick="openAddSvc()">+ Add Service</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Service Name</th><th>Category</th><th>Orders</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+        <tbody id="a-svc-tbody">
+          <tr><td><strong>Bill Payments & Banking</strong></td><td>Financial</td><td>420</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-danger-sm" onclick="toggleSvc(this)">Disable</button></div></td></tr>
+          <tr><td><strong>Home Maintenance</strong></td><td>Maintenance</td><td>312</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-danger-sm" onclick="toggleSvc(this)">Disable</button></div></td></tr>
+          <tr><td><strong>Delivery & Logistics</strong></td><td>Logistics</td><td>265</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-danger-sm" onclick="toggleSvc(this)">Disable</button></div></td></tr>
+          <tr><td><strong>Elderly Care & Support</strong></td><td>Care</td><td>190</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-danger-sm" onclick="toggleSvc(this)">Disable</button></div></td></tr>
+          <tr><td><strong>Legal Assistance</strong></td><td>Legal</td><td>88</td><td><span class="badge b-amber">Inactive</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-g" onclick="toggleSvc(this)">Enable</button></div></td></tr>
+          <tr><td><strong>Renovation & Painting</strong></td><td>Renovation</td><td>98</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-danger-sm" onclick="toggleSvc(this)">Disable</button></div></td></tr>
+        </tbody></table></div>
+      </div>
+
+      <!-- ANALYTICS -->
+      <div class="dsection" id="a-analytics">
+        <div class="tile-row">
+          <div class="tile"><div class="tile-label">Total Orders</div><div class="tile-val">1,373</div><div class="tile-sub">All time</div></div>
+          <div class="tile"><div class="tile-label">Active Users</div><div class="tile-val">847</div><div class="tile-sub">Registered customers</div></div>
+          <div class="tile"><div class="tile-label">Providers</div><div class="tile-val">132</div><div class="tile-sub">Verified</div></div>
+          <div class="tile gold-tile"><div class="tile-label">Revenue</div><div class="tile-val">2.4M</div><div class="tile-sub">USD this month</div></div>
+        </div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+          <div class="card-panel">
+            <div class="sec-head" style="margin-bottom:1.15rem"><h3>Orders by Service</h3></div>
+            <div class="bar-row"><div class="bar-lbl">Bill Payments</div><div class="bar-track"><div class="bar-fill" style="width:85%"></div></div><div class="bar-val">420</div></div>
+            <div class="bar-row"><div class="bar-lbl">Home Maintenance</div><div class="bar-track"><div class="bar-fill" style="width:70%"></div></div><div class="bar-val">312</div></div>
+            <div class="bar-row"><div class="bar-lbl">Delivery</div><div class="bar-track"><div class="bar-fill" style="width:58%"></div></div><div class="bar-val">265</div></div>
+            <div class="bar-row"><div class="bar-lbl">Elderly Care</div><div class="bar-track"><div class="bar-fill" style="width:42%"></div></div><div class="bar-val">190</div></div>
+            <div class="bar-row"><div class="bar-lbl">Renovation</div><div class="bar-track"><div class="bar-fill" style="width:22%"></div></div><div class="bar-val">98</div></div>
+            <div class="bar-row"><div class="bar-lbl">Legal</div><div class="bar-track"><div class="bar-fill" style="width:18%"></div></div><div class="bar-val">88</div></div>
+          </div>
+          <div class="card-panel">
+            <div class="sec-head" style="margin-bottom:1.15rem"><h3>Order Status Breakdown</h3></div>
+            <div style="display:flex;flex-direction:column;gap:.9rem">
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.8rem"><span style="color:var(--muted)">Completed</span><strong>68%</strong></div><div style="height:8px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:68%;height:100%;background:#059669;border-radius:100px"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.8rem"><span style="color:var(--muted)">In Progress</span><strong>19%</strong></div><div style="height:8px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:19%;height:100%;background:var(--g500);border-radius:100px"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.8rem"><span style="color:var(--muted)">Pending</span><strong>10%</strong></div><div style="height:8px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:10%;height:100%;background:var(--gold);border-radius:100px"></div></div></div>
+              <div><div style="display:flex;justify-content:space-between;margin-bottom:.3rem;font-size:.8rem"><span style="color:var(--muted)">Cancelled</span><strong>3%</strong></div><div style="height:8px;background:var(--border);border-radius:100px;overflow:hidden"><div style="width:3%;height:100%;background:#DC2626;border-radius:100px"></div></div></div>
+            </div>
+          </div>
+        </div>
+      </div>
+
+      <!-- USERS -->
+      <div class="dsection" id="a-users">
+        <div class="sec-head"><h3>User Management</h3><button class="btn-gold-sm">+ Add User</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Plan</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead><tbody>
+          <tr><td><strong>Ahmed Khan</strong></td><td>ahmed@example.com</td><td><span class="badge b-blue">Customer</span></td><td>Basic</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm">Edit</button><button class="btn-danger-sm">Suspend</button></div></td></tr>
+          <tr><td><strong>Fatima Malik</strong></td><td>fatima@example.com</td><td><span class="badge b-blue">Customer</span></td><td>Basic</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm">Edit</button><button class="btn-danger-sm">Suspend</button></div></td></tr>
+          <tr><td><strong>Amna Siddiqui</strong></td><td>amna@raabta.com</td><td><span class="badge b-purple">Supervisor</span></td><td>—</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm">Edit</button><button class="btn-danger-sm">Disable</button></div></td></tr>
+        </tbody></table></div>
+      </div>
+
+      <!-- ACTIVITY LOGS -->
+      <div class="dsection" id="a-logs">
+        <div class="sec-head"><h3>Activity Logs</h3><button class="btn-outline-sm">Export CSV</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Timestamp</th><th>Event</th><th>Actor</th><th>Details</th></tr></thead><tbody>
+          <tr><td style="color:var(--muted)">2026-05-02 14:32</td><td><span class="badge b-blue">Order Created</span></td><td>Ahmed Khan</td><td>#ORD-4825 — Elderly Care</td></tr>
+          <tr><td style="color:var(--muted)">2026-05-02 14:28</td><td><span class="badge b-purple">Order Assigned</span></td><td>Amna (Supervisor)</td><td>#ORD-4824 → Bilal Ahmed</td></tr>
+          <tr><td style="color:var(--muted)">2026-05-02 13:55</td><td><span class="badge b-amber">Status Updated</span></td><td>Amna (Supervisor)</td><td>#ORD-4823 → In Progress</td></tr>
+          <tr><td style="color:var(--muted)">2026-05-02 12:10</td><td><span class="badge b-green">Order Completed</span></td><td>System</td><td>#ORD-4820 marked Completed</td></tr>
+          <tr><td style="color:var(--muted)">2026-05-02 11:44</td><td><span class="badge b-gray">Service Disabled</span></td><td>Admin</td><td>Legal Assistance → Inactive</td></tr>
+        </tbody></table></div>
+      </div>
+
+      <!-- COMPLAINTS -->
+      <div class="dsection" id="a-complaints">
+        <div class="sec-head"><h3>Complaint Inbox</h3></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Ref #</th><th>Customer</th><th>Category</th><th>Order Ref</th><th>Status</th><th style="text-align:right">Action</th></tr></thead><tbody>
+          <tr><td><strong>CMP-012</strong></td><td>Sara Javed</td><td>Provider Late</td><td>#ORD-4818</td><td><span class="badge b-amber">Open</span></td><td style="text-align:right"><button class="btn-gold-sm">Resolve</button></td></tr>
+          <tr><td><strong>CMP-011</strong></td><td>Omar Siddiqui</td><td>Wrong Service</td><td>#ORD-4815</td><td><span class="badge b-green">Resolved</span></td><td style="text-align:right"><span style="font-size:.78rem;color:var(--muted)">Closed</span></td></tr>
+        </tbody></table></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ══════════════════════════════════════════════════════
+     PAGE 5 — SUPERVISOR DASHBOARD
+══════════════════════════════════════════════════════ -->
+<div class="page" id="pg-supervisor">
+<div class="dash-layout">
+  <aside class="sidebar">
+    <div class="sb-logo">Raab<span>ta</span></div>
+    <div class="sb-role">Supervisor</div>
+    <div class="sb-nav">
+      <div class="sb-link active" onclick="sShow('s-orders',this)"><svg viewBox="0 0 24 24"><path d="M9 5H7a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h10a2 2 0 0 0 2-2V7a2 2 0 0 0-2-2h-2"/><rect x="9" y="3" width="6" height="4" rx="1"/></svg>Orders</div>
+      <div class="sb-link" onclick="sShow('s-assign',this)"><svg viewBox="0 0 24 24"><circle cx="12" cy="8" r="4"/><path d="M4 20v-1a8 8 0 0 1 16 0v1"/></svg>Assign Order</div>
+      <div class="sb-link" onclick="sShow('s-status',this)"><svg viewBox="0 0 24 24"><polyline points="22 12 18 12 15 21 9 3 6 12 2 12"/></svg>Update Status</div>
+      <div class="sb-link" onclick="sShow('s-providers',this)"><svg viewBox="0 0 24 24"><path d="M17 21v-2a4 4 0 0 0-4-4H5a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><line x1="23" y1="11" x2="17" y2="11"/><line x1="20" y1="8" x2="20" y2="14"/></svg>Providers</div>
+    </div>
+    <div class="sb-footer"><button onclick="goPage('pg-home')">← Back to Home</button></div>
+  </aside>
+  <div class="dash-main">
+    <div class="dash-topbar">
+      <h2 id="s-title">Orders</h2>
+      <div class="tb-right"><div class="tb-notif"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div><div class="tb-avatar">SV</div></div>
+    </div>
+    <div class="dash-content">
+
+      <!-- ORDERS -->
+      <div class="dsection active" id="s-orders">
+        <div class="tile-row">
+          <div class="tile"><div class="tile-label">Unassigned</div><div class="tile-val">7</div><div class="tile-sub">Need assignment</div></div>
+          <div class="tile"><div class="tile-label">In Progress</div><div class="tile-val">14</div><div class="tile-sub">Active now</div></div>
+          <div class="tile"><div class="tile-label">Completed Today</div><div class="tile-val">9</div><div class="tile-sub">Since midnight</div></div>
+        </div>
+        <div class="sec-head"><h3>All Orders</h3><button class="btn-outline-sm">Filter</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Service</th><th>City</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead><tbody>
+          <tr><td><strong>#ORD-4825</strong></td><td>Fatima Malik</td><td>Elderly Care</td><td>Karachi</td><td><span class="badge b-amber">Requested</span></td><td><div class="td-actions"><button class="btn-gold-sm" onclick="sGoAssign('#ORD-4825','Elderly Care')">Assign</button><button class="btn-outline-sm" onclick="sGoStatus('#ORD-4825')">Status</button></div></td></tr>
+          <tr><td><strong>#ORD-4824</strong></td><td>Omar Siddiqui</td><td>Home Maintenance</td><td>Islamabad</td><td><span class="badge b-blue">In Progress</span></td><td><div class="td-actions"><button class="btn-g" onclick="sGoAssign('#ORD-4824','Home Maintenance')">Reassign</button><button class="btn-outline-sm" onclick="sGoStatus('#ORD-4824')">Status</button></div></td></tr>
+          <tr><td><strong>#ORD-4823</strong></td><td>Sara Javed</td><td>Bill Payment</td><td>Lahore</td><td><span class="badge b-blue">In Progress</span></td><td><div class="td-actions"><button class="btn-g" onclick="sGoAssign('#ORD-4823','Bill Payment')">Reassign</button><button class="btn-outline-sm" onclick="sGoStatus('#ORD-4823')">Status</button></div></td></tr>
+          <tr><td><strong>#ORD-4822</strong></td><td>Ahmed Khan</td><td>Bill Payment — LESCO</td><td>Lahore</td><td><span class="badge b-amber">Assigned</span></td><td><div class="td-actions"><button class="btn-g" onclick="sGoAssign('#ORD-4822','Bill Payment')">Reassign</button><button class="btn-outline-sm" onclick="sGoStatus('#ORD-4822')">Status</button></div></td></tr>
+          <tr><td><strong>#ORD-4820</strong></td><td>Ahmed Khan</td><td>Electrical Work</td><td>Lahore</td><td><span class="badge b-green">Completed</span></td><td><span style="font-size:.78rem;color:var(--muted)">Done</span></td></tr>
+        </tbody></table></div>
+      </div>
+
+      <!-- ASSIGN -->
+      <div class="dsection" id="s-assign">
+        <div class="sec-head"><h3>Assign Order to Provider</h3></div>
+        <div class="card-panel">
+          <div class="info-block"><div class="ib-label">Selected Order</div><div class="ib-val" id="s-assign-info">No order selected — go to Orders and click Assign</div></div>
+          <div class="field-row">
+            <div class="field-g"><label>Select Provider</label>
+              <select id="s-provider">
+                <option value="">Choose a provider…</option>
+                <option>Ali Hassan — Home Maintenance (Lahore) ✅ Available</option>
+                <option>Bilal Ahmed — Bill Payments (Lahore) ✅ Available</option>
+                <option>Zain Mir — Electrical (Islamabad) ✅ Available</option>
+                <option>Raza Karim — Elderly Care (Karachi) ✅ Available</option>
+                <option>Kamran Shah — Renovation (Lahore) 🔴 Busy</option>
+              </select>
+            </div>
+            <button class="btn-gold-sm" style="padding:.6rem 1.4rem;flex-shrink:0" onclick="doAssign()">Assign →</button>
+          </div>
+          <div class="field-g" style="margin-bottom:.75rem"><label>Record Provider Response</label>
+            <select id="s-prov-response"><option value="">Select response…</option><option>Accepted</option><option>Declined</option><option>No Response</option></select>
+          </div>
+          <p style="font-size:.79rem;color:var(--muted)">Provider will be notified via WhatsApp/SMS. Record their response before finalizing assignment.</p>
+        </div>
+        <div class="sec-head" style="margin-top:1.5rem"><h3>Recent Assignments</h3></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Order ID</th><th>Service</th><th>Provider</th><th>Response</th><th>Time</th><th>Status</th></tr></thead>
+        <tbody id="s-assign-log">
+          <tr><td>#ORD-4823</td><td>Bill Payment</td><td>Bilal Ahmed</td><td><span class="badge b-green">Accepted</span></td><td>10:05 AM</td><td><span class="badge b-blue">In Progress</span></td></tr>
+          <tr><td>#ORD-4824</td><td>Home Maintenance</td><td>Ali Hassan</td><td><span class="badge b-green">Accepted</span></td><td>1:35 PM</td><td><span class="badge b-blue">In Progress</span></td></tr>
+        </tbody></table></div>
+      </div>
+
+      <!-- STATUS -->
+      <div class="dsection" id="s-status">
+        <div class="sec-head"><h3>Update Order Status</h3></div>
+        <div class="card-panel">
+          <div class="info-block"><div class="ib-label">Selected Order</div><div class="ib-val" id="s-status-info">No order selected — go to Orders and click Status</div></div>
+          <div class="field-row">
+            <div class="field-g"><label>New Status</label>
+              <select id="s-new-status">
+                <option value="">Select status…</option>
+                <option>Requested</option>
+                <option>Assigned</option>
+                <option>In Progress</option>
+                <option>Completed</option>
+                <option>Cancelled</option>
+              </select>
+            </div>
+            <button class="btn-g" style="padding:.6rem 1.4rem;flex-shrink:0" onclick="doStatus()">Update →</button>
+          </div>
+          <div class="field-g"><label>Supervisor Note (optional)</label><input type="text" placeholder="e.g. Provider arrived at location, work started…"/></div>
+        </div>
+      </div>
+
+      <!-- PROVIDERS -->
+      <div class="dsection" id="s-providers">
+        <div class="sec-head"><h3>Provider Directory</h3><button class="btn-gold-sm">+ Add Provider</button></div>
+        <div class="provider-card"><div><div class="prov-name">Ali Hassan</div><div class="prov-detail">Home Maintenance · Lahore · 0300-1234567 · WhatsApp ✓</div></div><div style="display:flex;gap:.5rem;align-items:center"><span class="badge b-green">Available</span><button class="btn-outline-sm">Edit</button></div></div>
+        <div class="provider-card"><div><div class="prov-name">Bilal Ahmed</div><div class="prov-detail">Bill Payments & Banking · Lahore · 0321-9876543 · WhatsApp ✓</div></div><div style="display:flex;gap:.5rem;align-items:center"><span class="badge b-green">Available</span><button class="btn-outline-sm">Edit</button></div></div>
+        <div class="provider-card"><div><div class="prov-name">Zain Mir</div><div class="prov-detail">Electrical Work · Islamabad · 0333-5551234 · WhatsApp ✓</div></div><div style="display:flex;gap:.5rem;align-items:center"><span class="badge b-green">Available</span><button class="btn-outline-sm">Edit</button></div></div>
+        <div class="provider-card"><div><div class="prov-name">Raza Karim</div><div class="prov-detail">Elderly Care · Karachi · 0312-7773344 · WhatsApp ✓</div></div><div style="display:flex;gap:.5rem;align-items:center"><span class="badge b-green">Available</span><button class="btn-outline-sm">Edit</button></div></div>
+        <div class="provider-card"><div><div class="prov-name">Kamran Shah</div><div class="prov-detail">Renovation & Painting · Lahore · 0345-6663322 · WhatsApp ✓</div></div><div style="display:flex;gap:.5rem;align-items:center"><span class="badge b-amber">Busy</span><button class="btn-outline-sm">Edit</button></div></div>
+      </div>
+
+    </div>
+  </div>
+</div>
+</div>
+
+
+<!-- ══ MODALS ══ -->
+<div class="modal-bg" id="rate-modal" onclick="if(event.target===this)closeRate()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeRate()">✕</button>
+    <h3>Rate this Service</h3>
+    <p style="color:var(--muted);font-size:.875rem">How would you rate your experience with the provider?</p>
+    <div class="stars" id="stars"><span class="star" onclick="setRating(1)">★</span><span class="star" onclick="setRating(2)">★</span><span class="star" onclick="setRating(3)">★</span><span class="star" onclick="setRating(4)">★</span><span class="star" onclick="setRating(5)">★</span></div>
+    <div style="margin:.85rem 0 1.15rem"><label style="display:block;font-size:.78rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem">Comments (optional)</label><textarea rows="3" placeholder="Share your experience…"></textarea></div>
+    <button class="btn-g" style="width:100%;padding:.75rem" onclick="submitRate()">Submit Rating</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="addsvc-modal" onclick="if(event.target===this)closeAddSvc()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeAddSvc()">✕</button>
+    <h3>Add New Service</h3>
+    <div style="margin-bottom:.9rem"><label style="display:block;font-size:.78rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem">Service Name</label><input id="new-svc" type="text" style="width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.875rem;font-family:'Outfit',sans-serif;outline:none" placeholder="e.g. AC Maintenance"/></div>
+    <div style="margin-bottom:.9rem"><label style="display:block;font-size:.78rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem">Category</label><select style="width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.875rem;font-family:'Outfit',sans-serif;outline:none"><option>Financial</option><option>Maintenance</option><option>Logistics</option><option>Care</option><option>Legal</option><option>Renovation</option></select></div>
+    <div style="margin-bottom:1.25rem"><label style="display:block;font-size:.78rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem">Description</label><textarea style="width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.875rem;height:75px;resize:none;outline:none" placeholder="Short service description…"></textarea></div>
+    <button class="btn-g" style="width:100%;padding:.75rem" onclick="doAddSvc()">Add Service</button>
+  </div>
+</div>
+
+<div class="modal-bg" id="track-modal" onclick="if(event.target===this)closeTrack()">
+  <div class="modal">
+    <button class="modal-close" onclick="closeTrack()">✕</button>
+    <h3 id="tm-title">Order Status</h3>
+    <div style="background:var(--gold4);border:1px solid rgba(201,168,76,.3);border-radius:12px;padding:1.25rem;margin-bottom:1.25rem">
+      <div style="font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g600);margin-bottom:.35rem">Order ID</div>
+      <div style="font-weight:700;color:var(--g800);font-size:1.05rem" id="tm-id">ORD-4821</div>
+    </div>
+    <div style="display:flex;flex-direction:column;gap:.6rem;margin-bottom:1.25rem" id="tm-steps">
+      <div style="display:flex;align-items:center;gap:.75rem;font-size:.875rem"><span style="width:22px;height:22px;background:var(--g500);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:.7rem;flex-shrink:0">✓</span><span style="color:var(--g700)">Requested — Order placed and confirmed</span></div>
+      <div style="display:flex;align-items:center;gap:.75rem;font-size:.875rem"><span style="width:22px;height:22px;background:var(--g500);border-radius:50%;display:flex;align-items:center;justify-content:center;color:white;font-size:.7rem;flex-shrink:0">✓</span><span style="color:var(--g700)">Assigned — Provider identified and contacted</span></div>
+      <div style="display:flex;align-items:center;gap:.75rem;font-size:.875rem"><span style="width:22px;height:22px;background:var(--gold);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--g900);font-size:.7rem;flex-shrink:0;font-weight:700">→</span><span style="color:var(--g800);font-weight:600">In Progress — Work underway at your location</span></div>
+      <div style="display:flex;align-items:center;gap:.75rem;font-size:.875rem"><span style="width:22px;height:22px;background:var(--border);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--muted);font-size:.7rem;flex-shrink:0">○</span><span style="color:var(--muted)">Completed</span></div>
+    </div>
+    <button class="btn-g" style="width:100%;padding:.72rem" onclick="closeTrack()">Close</button>
+  </div>
+</div>
+
+
+<!-- ══ PREVIEW BAR ══ -->
+<div class="preview-bar">
+  <span>Preview:</span>
+  <button class="pb-btn cur" onclick="goPage('pg-home');setPB(this)">🏠 Home</button>
+  <button class="pb-btn" onclick="goPage('pg-auth');setPB(this)">🔐 Auth</button>
+  <button class="pb-btn" onclick="goPage('pg-customer');setPB(this)">👤 Customer</button>
+  <button class="pb-btn" onclick="goPage('pg-admin');setPB(this)">⚙️ Admin</button>
+  <button class="pb-btn" onclick="goPage('pg-supervisor');setPB(this)">📋 Supervisor</button>
+</div>
+
+
+<script>
+(function(){
+'use strict';
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+const pageIds=['pg-home','pg-auth','pg-customer','pg-admin','pg-supervisor'];
+const byId=id=>document.getElementById(id);
+const nativeScroll=window.scrollTo.bind(window);
+
+window.setPB=function(btn){document.querySelectorAll('.pb-btn').forEach(b=>b.classList.remove('cur')); if(btn)btn.classList.add('cur');};
+window.setPBByPage=function(id){const map={'pg-home':0,'pg-auth':1,'pg-customer':2,'pg-admin':3,'pg-supervisor':4}; const btns=document.querySelectorAll('.pb-btn'); btns.forEach(b=>b.classList.remove('cur')); if(map[id]!==undefined&&btns[map[id]])btns[map[id]].classList.add('cur');};
+    
+window.goPage=function(id){pageIds.forEach(pid=>{const p=byId(pid); if(p)p.classList.toggle('active',pid===id)});setPBByPage(id);nativeScroll({top:0,left:0,behavior:'auto'});};
+window.scrollToSection=function(id){goPage('pg-home');setTimeout(()=>{const el=byId(id); if(el)el.scrollIntoView({behavior:'smooth',block:'start'});},80);};
+window.scrollTo=function(arg){if(typeof arg==='string')return scrollToSection(arg); return nativeScroll(arg);};
+window.authTab=function(mode,btn){document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));const tabs=document.querySelectorAll('.auth-tab'); if(btn)btn.classList.add('active'); else if(tabs[mode==='login'?0:1])tabs[mode==='login'?0:1].classList.add('active'); byId('ap-'+mode)?.classList.add('active'); if(byId('auth-heading'))byId('auth-heading').textContent=mode==='login'?'Welcome Back':'Create Account'; if(byId('auth-sub'))byId('auth-sub').textContent=mode==='login'?'Sign in to your Raabta account':'Join thousands using Raabta';};
+window.authLogin=function(){const r=(prompt('Demo role: customer / admin / supervisor')||'customer').toLowerCase().trim(); if(r==='admin')goPage('pg-admin'); else if(r==='supervisor')goPage('pg-supervisor'); else goPage('pg-customer');};
+window.authSignup=function(){const r=(byId('su-role')?.value||'').toLowerCase(); if(!r){alert('Please select a role.');return} if(r==='admin')goPage('pg-admin'); else if(r==='supervisor')goPage('pg-supervisor'); else goPage('pg-customer');};
+function showSection(scope,id,link,titleId,titles){document.querySelectorAll(`#${scope} .dsection`).forEach(s=>s.classList.remove('active'));document.querySelectorAll(`#${scope} .sb-link`).forEach(a=>a.classList.remove('active'));byId(id)?.classList.add('active'); if(link)link.classList.add('active'); if(byId(titleId)&&titles[id])byId(titleId).textContent=titles[id];}
+window.cShow=function(id,link){const ids=['c-dash','c-neworder','c-services','c-history','c-plans','c-complaints','c-profile']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-customer .sb-link')[i]:null} showSection('pg-customer',id,link,'c-title',{'c-dash':'Dashboard','c-neworder':'New Order','c-services':'Services','c-history':'Order History','c-plans':'My Plan','c-complaints':'Complaints','c-profile':'Profile'});};
+window.aShow=function(id,link){const ids=['a-services','a-analytics','a-users','a-logs','a-complaints']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-admin .sb-link')[i]:null} showSection('pg-admin',id,link,'a-title',{'a-services':'Services','a-analytics':'Analytics','a-users':'User Management','a-logs':'Activity Logs','a-complaints':'Complaints'});};
+window.sShow=function(id,link){const ids=['s-orders','s-assign','s-status','s-providers']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-supervisor .sb-link')[i]:null} showSection('pg-supervisor',id,link,'s-title',{'s-orders':'Orders','s-assign':'Assign Order','s-status':'Update Status','s-providers':'Provider Directory'});};
+window.openRate=()=>byId('rate-modal')?.classList.add('open'); window.closeRate=()=>byId('rate-modal')?.classList.remove('open'); window.setRating=n=>document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('lit',i<n)); window.submitRate=function(){closeRate();alert('✅ Thank you! Your rating has been saved.');};
+window.trackOrder=function(){const v=(byId('track-input')?.value||'').trim(); if(!v){alert('Please enter an Order ID.');return} if(byId('tm-id'))byId('tm-id').textContent=v; if(byId('tm-title'))byId('tm-title').textContent='Order Status — '+v; byId('track-modal')?.classList.add('open');}; window.closeTrack=()=>byId('track-modal')?.classList.remove('open');
+window.submitComplaint=function(){const order=(byId('complaint-order')?.value||'').trim()||'N/A'; const type=(byId('complaint-type')?.value||'').trim(); const details=(byId('complaint-details')?.value||'').trim(); if(!type){alert('Please select a complaint type.');return} if(!details){alert('Please add complaint details.');return} const id='CMP-'+Math.floor(100+Math.random()*900); const tr=document.createElement('tr'); tr.innerHTML=`<td><strong>${id}</strong></td><td>${order}</td><td>${type}</td><td><span class="badge b-amber">Open</span></td>`; byId('complaint-list')?.prepend(tr); ['complaint-order','complaint-type','complaint-details'].forEach(x=>{if(byId(x))byId(x).value=''}); alert(`✅ Complaint submitted. Your complaint ID is ${id}.`);};
+window.openAddSvc=()=>byId('addsvc-modal')?.classList.add('open'); window.closeAddSvc=()=>byId('addsvc-modal')?.classList.remove('open');
+window.doAddSvc=function(){const input=byId('new-svc');const name=(input?.value||'').trim(); if(!name){alert('Enter a service name.');return} const tr=document.createElement('tr');tr.innerHTML=`<td><strong>${name}</strong></td><td>General</td><td>0</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-danger-sm" onclick="toggleSvc(this)">Disable</button></div></td>`; byId('a-svc-tbody')?.appendChild(tr); if(input)input.value=''; closeAddSvc();};
+window.editSvc=function(btn){const s=btn.closest('tr')?.querySelector('strong'); if(!s)return; const n=prompt('Edit service name:',s.textContent); if(n)s.textContent=n;};
+window.toggleSvc=function(btn){const b=btn.closest('tr')?.querySelector('.badge'); if(!b)return; const on=b.classList.contains('b-green'); b.className='badge '+(on?'b-amber':'b-green'); b.textContent=on?'Inactive':'Active'; btn.textContent=on?'Enable':'Disable'; btn.className=on?'btn-g':'btn-danger-sm';};
+window.sGoAssign=function(id,svc){if(byId('s-assign-info'))byId('s-assign-info').textContent=`${id} — ${svc}`; sShow('s-assign');};
+window.sGoStatus=function(id){if(byId('s-status-info'))byId('s-status-info').textContent=id; sShow('s-status');};
+window.doAssign=function(){alert('Assignment saved in demo mode. Connect PATCH /orders/:id/assign for backend integration.');};
+window.doStatus=function(){alert('Status updated in demo mode. Connect PATCH /orders/:id/status for backend integration.');};
+function bindNavigation(){document.querySelectorAll('.nav-links a').forEach(a=>{const t=a.textContent.toLowerCase(); if(t.includes('about'))a.onclick=e=>{e.preventDefault();scrollToSection('about-anchor')}; if(t.includes('services'))a.onclick=e=>{e.preventDefault();scrollToSection('services-anchor')}; if(t.includes('pricing'))a.onclick=e=>{e.preventDefault();scrollToSection('pricing-anchor')};}); 
+    document.querySelectorAll('.preview-bar .pb-btn').forEach(btn=>btn.onclick=e=>{e.preventDefault();const t=btn.textContent;if(t.includes('Home'))goPage('pg-home');else if(t.includes('Auth'))goPage('pg-auth');else if(t.includes('Customer'))goPage('pg-customer');else if(t.includes('Admin'))goPage('pg-admin');else if(t.includes('Supervisor'))goPage('pg-supervisor');});
+     const explore=[...document.querySelectorAll('button')].find(b=>b.textContent.includes('Explore Services')); if(explore)explore.onclick=e=>{e.preventDefault();scrollToSection('services-anchor')};}
+document.addEventListener('click',e=>{const target=e.target.closest('button,a,.sb-link'); if(!target)return; const txt=target.textContent.trim(); if(target.closest('#pg-customer .sb-nav')){const links=[...document.querySelectorAll('#pg-customer .sb-link')],ids=['c-dash','c-neworder','c-services','c-history','c-plans','c-complaints','c-profile'],i=links.indexOf(target); if(i>=0){e.preventDefault();cShow(ids[i],target);return}} if(target.closest('#pg-admin .sb-nav')){const links=[...document.querySelectorAll('#pg-admin .sb-link')],ids=['a-services','a-analytics','a-users','a-logs','a-complaints'],i=links.indexOf(target); if(i>=0){e.preventDefault();aShow(ids[i],target);return}} if(target.closest('#pg-supervisor .sb-nav')){const links=[...document.querySelectorAll('#pg-supervisor .sb-link')],ids=['s-orders','s-assign','s-status','s-providers'],i=links.indexOf(target); if(i>=0){e.preventDefault();sShow(ids[i],target);return}} if(txt==='Submit Complaint'){e.preventDefault();submitComplaint();}});
+document.addEventListener('DOMContentLoaded',bindNavigation); if(document.readyState!=='loading')bindNavigation();
+})();
+</script>
+</body>
+</html>
