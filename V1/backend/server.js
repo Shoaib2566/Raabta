@@ -269,6 +269,22 @@ app.post('/api/complaints', authenticateToken, authorizeRole(['customer']), asyn
     }
 });
 
+// Get Customer Complaints
+app.get('/api/customer/complaints', authenticateToken, authorizeRole(['customer']), async (req, res) => {
+    try {
+        const { data: complaints, error } = await supabase.from('service_cases')
+            .select('case_id, order_id, category, status')
+            .eq('customer_id', req.user.user_id)
+            .eq('case_type', 'complaint')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+        res.json(complaints);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
 
 // ==========================================
 // 4. SUPERVISOR DASHBOARD (Protected)
