@@ -293,15 +293,31 @@ app.get('/api/customer/complaints', authenticateToken, authorizeRole(['customer'
 // FR3.4.1, FR3.4.6 - View Orders for Supervisor
 app.get('/api/supervisor/orders', authenticateToken, authorizeRole(['supervisor', 'admin']), async (req, res) => {
     try {
+        // 1. Fetch orders and services (safe join)
         const { data: orders, error } = await supabase.from('orders')
             .select(`
-                order_id, status, requested_at, service_address,
-                services(service_name),
-                app_users!orders_customer_id_fkey(full_name, phone_no)
+                order_id, status, requested_at, service_address, customer_id,
+                services(service_name)
             `)
             .order('requested_at', { ascending: false });
 
         if (error) throw error;
+
+        // 2. Safely fetch customer names manually to prevent Foreign Key crashes
+        if (orders && orders.length > 0) {
+            const customerIds = [...new Set(orders.map(o => o.customer_id))];
+            
+            const { data: users } = await supabase.from('app_users')
+                .select('user_id, full_name')
+                .in('user_id', customerIds);
+            
+            orders.forEach(order => {
+                const user = users?.find(u => u.user_id === order.customer_id);
+                // Attach to order object so app.js can read it exactly as expected
+                order.app_users = { full_name: user ? user.full_name : 'Unknown Customer' }; 
+            });
+        }
+
         res.json(orders);
     } catch (err) {
         res.status(500).json({ error: err.message });
@@ -379,6 +395,65 @@ app.post('/api/supervisor/status', authenticateToken, authorizeRole(['supervisor
     }
 });
 
+// FR3.4.6 - View Recent Assignments for Supervisor
+app.get('/api/supervisor/assignments', authenticateToken, authorizeRole(['supervisor', 'admin']), async (req, res) => {
+    try {
+        const { data: assignments, error } = await supabase.from('order_assignments')
+            .select(`
+                assignment_id, assigned_at, provider_response,
+                orders(order_id, status, services(service_name)),
+                service_providers(provider_name)
+            `)
+            .eq('supervisor_id', req.user.user_id)
+            .order('assigned_at', { ascending: false })
+            .limit(10); // Fetch top 10 most recent
+
+        if (error) throw error;
+        res.json(assignments);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// FR3.4.5 - Add a New Provider
+app.post('/api/supervisor/providers', authenticateToken, authorizeRole(['supervisor', 'admin']), async (req, res) => {
+    try {
+        const { provider_name, phone, whatsapp_no, service_area } = req.body;
+        
+        const { data: provider, error } = await supabase.from('service_providers').insert([{
+            provider_name,
+            phone,
+            whatsapp_no,
+            service_area,
+            availability_status: 'available',
+            is_active: true,
+            primary_supervisor_id: req.user.user_id 
+        }]).select().single();
+
+        if (error) throw error;
+        res.status(201).json({ message: 'Provider added successfully', provider });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// FR3.4.5 - Update an Existing Provider
+app.patch('/api/supervisor/providers/:id', authenticateToken, authorizeRole(['supervisor', 'admin']), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { provider_name, phone, whatsapp_no, service_area, availability_status } = req.body;
+
+        const { data: provider, error } = await supabase.from('service_providers')
+            .update({ provider_name, phone, whatsapp_no, service_area, availability_status })
+            .eq('provider_id', id)
+            .select().single();
+
+        if (error) throw error;
+        res.json({ message: 'Provider updated successfully', provider });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // ==========================================
 // 5. ADMIN DASHBOARD (Protected)

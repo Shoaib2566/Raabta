@@ -265,8 +265,19 @@ window.cShow=function(id,link){
 };
 
 window.aShow=function(id,link){const ids=['a-services','a-analytics','a-users','a-logs','a-complaints']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-admin .sb-link')[i]:null} showSection('pg-admin',id,link,'a-title',{'a-services':'Services','a-analytics':'Analytics','a-users':'User Management','a-logs':'Activity Logs','a-complaints':'Complaints'});};
-window.sShow=function(id,link){const ids=['s-orders','s-assign','s-status','s-providers']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-supervisor .sb-link')[i]:null} showSection('pg-supervisor',id,link,'s-title',{'s-orders':'Orders','s-assign':'Assign Order','s-status':'Update Status','s-providers':'Provider Directory'});};
+window.sShow=function(id,link){
+    const ids=['s-orders','s-assign','s-status','s-providers']; 
+    if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-supervisor .sb-link')[i]:null} 
+    showSection('pg-supervisor',id,link,'s-title',{'s-orders':'Orders','s-assign':'Assign Order','s-status':'Update Status','s-providers':'Provider Directory'});
 
+    // Trigger data fetch operations based on tab
+    if (id === 's-orders') loadSupervisorOrders();
+    if (id === 's-providers') loadSupervisorProviders();
+    if (id === 's-assign') { 
+        loadSupervisorProviders(); 
+        loadSupervisorAssignments(); 
+    }
+};
 window.openRate=()=>byId('rate-modal')?.classList.add('open'); window.closeRate=()=>byId('rate-modal')?.classList.remove('open'); window.setRating=n=>document.querySelectorAll('.star').forEach((s,i)=>s.classList.toggle('lit',i<n)); window.submitRate=function(){closeRate();alert('✅ Thank you! Your rating has been saved.');};
 
 // Guest Order Tracking
@@ -393,29 +404,249 @@ window.doAssign = async function() {
     const orderText = byId('s-assign-info')?.textContent || '';
     const order_id = orderText.match(/\d+/)?.[0];
     const provider_id = byId('s-provider')?.value;
-    const provider_response = byId('s-prov-response')?.value;
-    if (!order_id || !provider_id) { alert('Select an order and a provider.'); return; }
+    const provider_response = (byId('s-prov-response')?.value || '').toLowerCase().replace(' ', '_');
+    
+    if (!order_id || !provider_id) { alert('Please select an order and a provider.'); return; }
+    
     try {
         await fetchWithAuth('/supervisor/assign', {
             method: 'POST',
             body: JSON.stringify({ order_id: parseInt(order_id), provider_id, provider_response })
         });
-        alert('✅ Order assigned successfully.');
-    } catch(e) { alert('Error assigning order: ' + e.message); }
+        alert('Order assigned successfully.');
+        sShow('s-orders'); // Redirect to orders list to view update
+    } catch(e) { 
+        alert('Error assigning order: ' + e.message); 
+    }
 };
+
 window.doStatus = async function() {
     const orderText = byId('s-status-info')?.textContent || '';
     const order_id = orderText.match(/\d+/)?.[0];
     const new_status = byId('s-new-status')?.value?.toLowerCase().replace(' ', '_');
-    if (!order_id || !new_status) { alert('Select an order and a new status.'); return; }
+    
+    // Select the second input field in the s-status section (Supervisor Note)
+    const remarks = document.querySelector('#s-status input[type="text"]')?.value || '';
+
+    if (!order_id || !new_status) { alert('Please select an order and a new status.'); return; }
+    
     try {
         await fetchWithAuth('/supervisor/status', {
             method: 'POST',
-            body: JSON.stringify({ order_id: parseInt(order_id), new_status })
+            body: JSON.stringify({ order_id: parseInt(order_id), new_status, remarks })
         });
-        alert('✅ Status updated successfully.');
-    } catch(e) { alert('Error updating status: ' + e.message); }
+        alert('Status updated successfully.');
+        document.querySelector('#s-status input[type="text"]').value = ''; // Clear notes
+        sShow('s-orders'); // Redirect to orders list
+    } catch(e) { 
+        alert('Error updating status: ' + e.message); 
+    }
 };
+// ==========================================
+// SUPERVISOR DASHBOARD FETCHERS
+// ==========================================
+window.loadSupervisorOrders = async function() {
+    try {
+        const tbody = document.querySelector('#s-orders tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Loading orders...</td></tr>';
+
+        const orders = await fetchWithAuth('/supervisor/orders');
+        
+        // Calculate Statistics
+        let unassignedCount = 0;
+        let inProgressCount = 0;
+        let completedTodayCount = 0;
+        const todayStr = new Date().toDateString();
+
+        orders.forEach(o => {
+            if (o.status === 'requested') unassignedCount++;
+            if (o.status === 'in_progress') inProgressCount++;
+            if (o.status === 'completed') {
+                const updatedDate = new Date(o.requested_at).toDateString(); // Or updated_at if tracked
+                if (updatedDate === todayStr) completedTodayCount++;
+            }
+        });
+
+        // Update Dashboard Tiles
+        const tiles = document.querySelectorAll('#s-orders .tile-val');
+        if (tiles.length >= 3) {
+            tiles[0].textContent = unassignedCount;
+            tiles[1].textContent = inProgressCount;
+            tiles[2].textContent = completedTodayCount;
+        }
+
+        // Render Orders Table
+        tbody.innerHTML = '';
+        if (orders.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No orders available.</td></tr>';
+            return;
+        }
+
+        orders.forEach(order => {
+            const statusClass = {
+                'requested': 'b-amber', 'assigned': 'b-amber', 'in_progress': 'b-blue', 'completed': 'b-green', 'cancelled': 'b-gray'
+            }[order.status] || 'b-gray';
+            const displayStatus = order.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+            const customerName = order.app_users?.full_name || 'Unknown';
+            const serviceName = order.services?.service_name || 'Service';
+
+            let actionHtml = '';
+            if (order.status !== 'completed' && order.status !== 'cancelled') {
+                const assignBtnText = order.status === 'requested' ? 'Assign' : 'Reassign';
+                const btnClass = order.status === 'requested' ? 'btn-gold-sm' : 'btn-g';
+                actionHtml = `
+                    <div class="td-actions">
+                        <button class="${btnClass}" onclick="sGoAssign('ORD-${order.order_id}', '${serviceName}')">${assignBtnText}</button>
+                        <button class="btn-outline-sm" onclick="sGoStatus('ORD-${order.order_id}')">Status</button>
+                    </div>`;
+            } else {
+                actionHtml = `<span style="font-size:.78rem;color:var(--muted)">Done</span>`;
+            }
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>#ORD-${order.order_id}</strong></td>
+                    <td>${customerName}</td>
+                    <td>${serviceName}</td>
+                    <td>${order.service_address || 'N/A'}</td>
+                    <td><span class="badge ${statusClass}">${displayStatus}</span></td>
+                    <td style="text-align:right">${actionHtml}</td>
+                </tr>`;
+        });
+    } catch (error) {
+        console.error("Supervisor Orders Load Error:", error);
+    }
+};
+
+window.loadSupervisorProviders = async function() {
+    try {
+        const directoryContainer = document.querySelector('#s-providers');
+        const assignSelect = document.getElementById('s-provider');
+
+        // 1. Ensure we have a dedicated, safe container just for the cards
+        let cardContainer = document.getElementById('prov-card-container');
+        if (directoryContainer && !cardContainer) {
+            
+            // AGGRESSIVE CLEANUP: Destroy all old "Loading..." text and dummy HTML
+            Array.from(directoryContainer.children).forEach(child => {
+                // If the element does NOT contain the Add Provider button, it's dummy data. Delete it.
+                if (!child.innerHTML?.includes('+ Add Provider')) {
+                    child.remove();
+                }
+            });
+            // Also wipe out any stray bare text nodes (just in case)
+            Array.from(directoryContainer.childNodes).forEach(node => {
+                if (node.nodeType === Node.TEXT_NODE && node.textContent.trim().length > 0) {
+                    node.remove();
+                }
+            });
+
+            // Create our new, easily clearable container
+            cardContainer = document.createElement('div');
+            cardContainer.id = 'prov-card-container';
+            cardContainer.style.display = 'flex';
+            cardContainer.style.flexDirection = 'column';
+            cardContainer.style.gap = '1rem';
+            cardContainer.style.marginTop = '1.5rem';
+            directoryContainer.appendChild(cardContainer);
+        }
+
+        // 2. Put it in a loading state INSIDE the safe zone
+        if (cardContainer) cardContainer.innerHTML = '<p style="color:var(--muted); font-style:italic;">Loading providers...</p>';
+        if (assignSelect) assignSelect.innerHTML = '<option value="">Loading providers...</option>';
+
+        // 3. Wait for the database
+        const providers = await fetchWithAuth('/supervisor/providers');
+
+        // 4. THE FIX: Wipe the container completely clean AFTER the fetch finishes
+        if (cardContainer) cardContainer.innerHTML = ''; 
+        if (assignSelect) assignSelect.innerHTML = '<option value="">Choose a provider…</option>';
+
+        if (!providers || providers.length === 0) {
+            if (cardContainer) cardContainer.innerHTML = '<p style="color:var(--muted)">No active providers found in database.</p>';
+            return;
+        }
+
+        // 5. Safely print the results
+        providers.forEach(p => {
+            const isAvail = p.availability_status !== 'busy';
+            const statusClass = isAvail ? 'b-green' : 'b-amber';
+            const statusText = isAvail ? 'Available' : 'Busy';
+            const whatsAppHtml = p.whatsapp_no ? ' · WhatsApp ✓' : '';
+            const area = p.service_area || 'General Area';
+
+            // Pass the provider data to the edit function safely
+            const pData = encodeURIComponent(JSON.stringify(p));
+            
+            if (cardContainer) {
+                cardContainer.innerHTML += `
+                    <div class="provider-card">
+                        <div>
+                            <div class="prov-name">${p.provider_name}</div>
+                            <div class="prov-detail">${area} · ${p.phone}${whatsAppHtml}</div>
+                        </div>
+                        <div style="display:flex;gap:.5rem;align-items:center">
+                            <span class="badge ${statusClass}">${statusText}</span>
+                            <button class="btn-outline-sm" onclick="openEditProvider('${pData}')">Edit</button>
+                        </div>
+                    </div>`;
+            }
+
+            // Populate the dropdown for the Assignment tab
+            if (assignSelect) {
+                // If they are not available, add the 'disabled' attribute
+                const disabledAttr = isAvail ? '' : 'disabled';
+                const statusLabel = isAvail ? '✅' : '🔴 (Busy)';
+                
+                assignSelect.innerHTML += `<option value="${p.provider_id}" ${disabledAttr}>${p.provider_name} — ${area} ${statusLabel}</option>`;
+            }
+        });
+    } catch (error) {
+        console.error("Supervisor Providers Load Error:", error);
+    }
+};
+
+window.loadSupervisorAssignments = async function() {
+    try {
+        const tbody = document.getElementById('s-assign-log');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">Loading assignments...</td></tr>';
+
+        const assignments = await fetchWithAuth('/supervisor/assignments');
+        tbody.innerHTML = '';
+
+        if (!assignments || assignments.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No recent assignments found.</td></tr>';
+            return;
+        }
+
+        assignments.forEach(a => {
+            const orderId = a.orders?.order_id || 'N/A';
+            const serviceName = a.orders?.services?.service_name || 'N/A';
+            const providerName = a.service_providers?.provider_name || 'N/A';
+            const response = a.provider_response ? a.provider_response.replace('_', ' ') : 'Pending';
+            const respClass = response.toLowerCase() === 'accepted' ? 'b-green' : (response.toLowerCase() === 'declined' ? 'b-red' : 'b-amber');
+            const time = new Date(a.assigned_at).toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            const status = a.orders?.status ? a.orders.status.replace('_', ' ') : 'N/A';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>#ORD-${orderId}</strong></td>
+                    <td>${serviceName}</td>
+                    <td>${providerName}</td>
+                    <td><span class="badge ${respClass}" style="text-transform:capitalize">${response}</span></td>
+                    <td>${time}</td>
+                    <td><span class="badge b-blue" style="text-transform:capitalize">${status}</span></td>
+                </tr>
+            `;
+        });
+    } catch (error) {
+        console.error("Assignments Load Error:", error);
+    }
+};
+
+
 
 // ==========================================
 // INITIALIZATION & EVENT LISTENERS
@@ -441,8 +672,25 @@ document.addEventListener('click',e=>{
     } 
     if(target.closest('#pg-supervisor .sb-nav')){
         const links=[...document.querySelectorAll('#pg-supervisor .sb-link')],ids=['s-orders','s-assign','s-status','s-providers'],i=links.indexOf(target); 
-        if(i>=0){e.preventDefault();sShow(ids[i],target);return}
-    } 
+        if(i>=0){
+            e.preventDefault();
+            
+            // 🔥 The Reset Logic 🔥
+            if (ids[i] === 's-assign' && byId('s-assign-info')) {
+                byId('s-assign-info').textContent = 'No order selected — go to Orders and click Assign';
+            }
+            if (ids[i] === 's-status' && byId('s-status-info')) {
+                byId('s-status-info').textContent = 'No order selected — go to Orders and click Status';
+            }
+            
+            sShow(ids[i],target);
+            return;
+        }
+    }
+    if(txt === '+ Add Provider') {
+        e.preventDefault();
+        openAddProvider();
+    }
 });
 
 document.addEventListener('DOMContentLoaded', () => {
@@ -488,3 +736,65 @@ document.addEventListener('DOMContentLoaded', () => {
 // Change Top Nav to "Dashboard" if logged in
 
 })();
+
+
+// --- Provider Management ---
+
+window.openAddProvider = async function() {
+    // Simple prompt-based input for adding a provider
+    const name = prompt("Enter Provider Name:");
+    if (!name) return;
+    const phone = prompt("Enter Phone Number (e.g. 0300-1234567):");
+    const area = prompt("Enter Service Area (e.g. Lahore):");
+    
+    // Default WhatsApp to the same as phone
+    const whatsapp = prompt("Enter WhatsApp Number:", phone);
+
+    try {
+        await fetchWithAuth('/supervisor/providers', {
+            method: 'POST',
+            body: JSON.stringify({ 
+                provider_name: name, 
+                phone: phone, 
+                whatsapp_no: whatsapp, 
+                service_area: area 
+            })
+        });
+        alert('Provider added successfully!');
+        loadSupervisorProviders(); // Refresh the list
+    } catch (error) {
+        alert('Error adding provider: ' + error.message);
+    }
+};
+
+window.openEditProvider = async function(encodedData) {
+    const p = JSON.parse(decodeURIComponent(encodedData));
+    
+    // Simple prompt-based input for editing
+    const name = prompt("Update Provider Name:", p.provider_name);
+    if (name === null) return; // Cancelled
+    
+    const phone = prompt("Update Phone Number:", p.phone);
+    const area = prompt("Update Service Area:", p.service_area);
+    const status = prompt("Update Status (Type 'available' or 'busy'):", p.availability_status);
+
+    try {
+        await fetchWithAuth(`/supervisor/providers/${p.provider_id}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ 
+                provider_name: name, 
+                phone: phone, 
+                whatsapp_no: phone, // Assuming WhatsApp is same as phone for edit
+                service_area: area,
+                availability_status: status?.toLowerCase() || 'available'
+            })
+        });
+        alert('Provider updated successfully!');
+        loadSupervisorProviders(); // Refresh the list
+    } catch (error) {
+        alert('Error updating provider: ' + error.message);
+    }
+};
+
+
+
