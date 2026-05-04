@@ -460,29 +460,65 @@ app.patch('/api/supervisor/providers/:id', authenticateToken, authorizeRole(['su
 // ==========================================
 
 // FR3.5.1, FR3.5.2 - Admin Analytics Dashboard
+// FR3.5.1, FR3.5.2 - Admin Analytics Dashboard
 app.get('/api/admin/dashboard', authenticateToken, authorizeRole(['admin']), async (req, res) => {
     try {
-        // Run concurrent aggregations
+        // Fetch all the raw data we need to construct the charts
         const [
-            { count: totalOrders },
+            { data: allOrders }, // Fetch all statuses and service IDs
             { count: activeUsers },
             { count: totalProviders },
             { data: servicesData }
         ] = await Promise.all([
-            supabase.from('orders').select('*', { count: 'exact', head: true }),
+            supabase.from('orders').select('status, service_id'),
             supabase.from('app_users').select('*', { count: 'exact', head: true }).eq('account_status', 'active'),
             supabase.from('service_providers').select('*', { count: 'exact', head: true }),
-            supabase.from('services').select('*')
+            supabase.from('services').select('service_id, service_name')
         ]);
+
+        const totalOrders = allOrders ? allOrders.length : 0;
+        
+        // Setup counting dictionaries
+        const statusCounts = { completed: 0, in_progress: 0, requested: 0, assigned: 0, cancelled: 0 };
+        const serviceCounts = {};
+
+        // Aggregate the data
+        if (allOrders) {
+            allOrders.forEach(o => {
+                if (statusCounts[o.status] !== undefined) {
+                    statusCounts[o.status]++;
+                } else {
+                    statusCounts[o.status] = 1;
+                }
+                
+                serviceCounts[o.service_id] = (serviceCounts[o.service_id] || 0) + 1;
+            });
+        }
+
+        // Format: Order Status Breakdown (Combine Requested/Assigned into 'Pending' for UI)
+        const pendingCount = (statusCounts.requested || 0) + (statusCounts.assigned || 0);
+        const orderStatusBreakdown = [
+            { label: 'Completed', count: statusCounts.completed || 0 },
+            { label: 'In Progress', count: statusCounts.in_progress || 0 },
+            { label: 'Pending', count: pendingCount },
+            { label: 'Cancelled', count: statusCounts.cancelled || 0 }
+        ];
+
+        // Format: Orders by Service (Map service IDs to actual names)
+        const ordersByService = (servicesData || []).map(s => ({
+            name: s.service_name,
+            count: serviceCounts[s.service_id] || 0
+        })).sort((a, b) => b.count - a.count); // Sort highest to lowest
 
         res.json({
             analytics: {
                 totalOrders,
                 activeUsers,
                 totalProviders,
-                revenueEstimate: "2.4M" // Placeholder, would aggregate from billing tables
+                revenueEstimate: "2.4M" // Static placeholder for now
             },
-            services: servicesData
+            ordersByService,
+            orderStatusBreakdown
         });
     } catch (err) {
         res.status(500).json({ error: err.message });

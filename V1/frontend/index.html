@@ -452,26 +452,46 @@
 
       <!-- ANALYTICS -->
       <div class="dsection" id="a-analytics">
-        <div class="tile-row">
-          <!-- Analytics tiles: filled by app.js -->
-          <div class="tile"><div class="tile-label">Total Orders</div><div class="tile-val" id="analytics-total-orders">--</div><div class="tile-sub">All time</div></div>
-          <div class="tile"><div class="tile-label">Active Users</div><div class="tile-val" id="analytics-active-users">--</div><div class="tile-sub">Registered customers</div></div>
-          <div class="tile"><div class="tile-label">Providers</div><div class="tile-val" id="analytics-providers">--</div><div class="tile-sub">Verified</div></div>
-          <div class="tile gold-tile"><div class="tile-label">Revenue</div><div class="tile-val" id="analytics-revenue">--</div><div class="tile-sub" id="analytics-revenue-label">This month</div></div>
+        <div class="tile-row" style="margin-bottom: 1.5rem; gap: 1.25rem;">
+          <!-- Tile 1 -->
+          <div class="tile" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; flex: 1;">
+              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--g600); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Total Orders</div>
+              <div id="analytics-total-orders" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: var(--g900); line-height: 1.2;">--</div>
+              <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem;">All time</div>
+          </div>
+          <!-- Tile 2 -->
+          <div class="tile" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; flex: 1;">
+              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--g600); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Active Users</div>
+              <div id="analytics-active-users" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: var(--g900); line-height: 1.2;">--</div>
+              <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem;">Registered customers</div>
+          </div>
+          <!-- Tile 3 -->
+          <div class="tile" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; flex: 1;">
+              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--g600); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Providers</div>
+              <div id="analytics-providers" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: var(--g900); line-height: 1.2;">--</div>
+              <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem;">Verified</div>
+          </div>
+          <!-- Tile 4 (Revenue) -->
+          <div class="tile" style="padding: 1.5rem; background: #1C3024; border: none; border-radius: 8px; flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
+              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #D4B254; margin-bottom: 0.5rem; letter-spacing: 0.5px;">Revenue</div>
+              <div id="analytics-revenue" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: #D4B254; line-height: 1.2;">--</div>
+              <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 0.4rem;">USD this month</div>
+          </div>
         </div>
-        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
-          <div class="card-panel">
-            <div class="sec-head" style="margin-bottom:1.15rem"><h3>Orders by Service</h3></div>
+
+        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem">
+          <div class="card-panel" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; max-width: none;">
+            <div style="margin-bottom: 1.5rem; font-size: 1.05rem; font-weight: 700; color: var(--g900);">Orders by Service</div>
             <!-- Chart bars: populated by app.js -->
             <div id="analytics-chart-bars">
               <div style="color:var(--muted);font-size:.855rem">Loading chart...</div>
             </div>
           </div>
-          <div class="card-panel">
-            <div class="sec-head" style="margin-bottom:1.15rem"><h3>Order Status Breakdown</h3></div>
+          <div class="card-panel" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; max-width: none;">
+            <div style="margin-bottom: 1.5rem; font-size: 1.05rem; font-weight: 700; color: var(--g900);">Order Status Breakdown</div>
             <!-- Status bars: populated by app.js -->
             <div id="analytics-status-bars">
-              <div style="color:var(--muted);font-size:.855rem">Loading...</div>
+              <div style="color:var(--muted);font-size:.855rem">Loading breakdown...</div>
             </div>
           </div>
         </div>

@@ -264,8 +264,14 @@ window.cShow=function(id,link){
     if (id === 'c-complaints') loadCustomerComplaints(); // <-- Add this line
 };
 
-window.aShow=function(id,link){const ids=['a-services','a-analytics','a-users','a-logs','a-complaints']; if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-admin .sb-link')[i]:null} showSection('pg-admin',id,link,'a-title',{'a-services':'Services','a-analytics':'Analytics','a-users':'User Management','a-logs':'Activity Logs','a-complaints':'Complaints'});};
-window.sShow=function(id,link){
+window.aShow=function(id,link){
+    const ids=['a-services','a-analytics','a-users','a-logs','a-complaints']; 
+    if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-admin .sb-link')[i]:null} 
+    showSection('pg-admin',id,link,'a-title',{'a-services':'Services','a-analytics':'Analytics','a-users':'User Management','a-logs':'Activity Logs','a-complaints':'Complaints'});
+    
+    // Trigger data fetch operations
+    if (id === 'a-analytics') loadAdminAnalytics();
+};window.sShow=function(id,link){
     const ids=['s-orders','s-assign','s-status','s-providers']; 
     if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-supervisor .sb-link')[i]:null} 
     showSection('pg-supervisor',id,link,'s-title',{'s-orders':'Orders','s-assign':'Assign Order','s-status':'Update Status','s-providers':'Provider Directory'});
@@ -735,11 +741,11 @@ document.addEventListener('DOMContentLoaded', () => {
 
 // Change Top Nav to "Dashboard" if logged in
 
-})();
 
+
+// Change Top Nav to "Dashboard" if logged in
 
 // --- Provider Management ---
-
 window.openAddProvider = async function() {
     // Simple prompt-based input for adding a provider
     const name = prompt("Enter Provider Name:");
@@ -796,5 +802,83 @@ window.openEditProvider = async function(encodedData) {
     }
 };
 
+// ==========================================
+// ADMIN DASHBOARD FETCHERS
+// ==========================================
+window.loadAdminAnalytics = async function() {
+    try {
+        const data = await fetchWithAuth('/admin/dashboard');
 
+        // 1. Update Top Tiles
+        const formatNum = num => new Intl.NumberFormat().format(num);
+        if(byId('analytics-total-orders')) byId('analytics-total-orders').textContent = formatNum(data.analytics.totalOrders);
+        if(byId('analytics-active-users')) byId('analytics-active-users').textContent = formatNum(data.analytics.activeUsers);
+        if(byId('analytics-providers')) byId('analytics-providers').textContent = formatNum(data.analytics.totalProviders);
+        
+        // Custom styling for the "M" in Revenue
+        if(byId('analytics-revenue')) {
+            const rev = data.analytics.revenueEstimate.replace('M', '<span style="font-size:1.6rem; margin-left: 2px;">M</span>');
+            byId('analytics-revenue').innerHTML = rev;
+        }
 
+        // 2. Orders by Service (Horizontal Bars)
+        const serviceBarsContainer = byId('analytics-chart-bars');
+        if (serviceBarsContainer && data.ordersByService) {
+            serviceBarsContainer.innerHTML = '';
+            
+            // Find max count to scale the bars relative to the most popular service
+            const maxCount = Math.max(...data.ordersByService.map(s => s.count), 1);
+
+            data.ordersByService.forEach(svc => {
+                const percentage = (svc.count / maxCount) * 100;
+                serviceBarsContainer.innerHTML += `
+                    <div style="display:flex; align-items:center; margin-bottom: 1rem; gap: 1rem;">
+                        <div style="width: 140px; font-size: 0.85rem; color: var(--g700); white-space: nowrap; overflow: hidden; text-overflow: ellipsis;">${svc.name}</div>
+                        <div style="flex-grow: 1; height: 10px; background: #E4E5E0; border-radius: 6px; overflow: hidden;">
+                            <div style="width: ${percentage}%; height: 100%; background: #235234; border-radius: 6px; transition: width 1s ease-out;"></div>
+                        </div>
+                        <div style="width: 35px; font-size: 0.9rem; font-weight: 700; text-align: right; color: var(--g900);">${svc.count}</div>
+                    </div>
+                `;
+            });
+        }
+
+        // 3. Order Status Breakdown (Separated Stacked Bars)
+        const statusBarsContainer = byId('analytics-status-bars');
+        if (statusBarsContainer && data.orderStatusBreakdown) {
+            statusBarsContainer.innerHTML = '';
+            const totalOrders = data.analytics.totalOrders || 1; 
+
+            data.orderStatusBreakdown.forEach(status => {
+                const percentage = Math.round((status.count / totalOrders) * 100);
+                
+                // Color mapping matching your screenshot design
+                const colors = {
+                    'Completed': '#00B67A',      // Bright Green
+                    'In Progress': '#235234',    // Dark Green
+                    'Pending': '#D4B254',        // Gold
+                    'Cancelled': '#EF4444'       // Red
+                };
+                const color = colors[status.label] || '#999';
+
+                statusBarsContainer.innerHTML += `
+                    <div style="margin-bottom: 1.4rem;">
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 0.5rem;">
+                            <span style="font-size: 0.85rem; color: var(--g700);">${status.label}</span>
+                            <span style="font-size: 0.85rem; font-weight: 700; color: var(--g900);">${percentage}%</span>
+                        </div>
+                        <div style="width: 100%; height: 8px; background: #E4E5E0; border-radius: 4px; overflow: hidden;">
+                            <div style="width: ${percentage}%; height: 100%; background: ${color}; border-radius: 4px; transition: width 1s ease-out;"></div>
+                        </div>
+                    </div>
+                `;
+            });
+        }
+
+    } catch (e) {
+        console.error('Analytics load error:', e);
+        if(byId('analytics-chart-bars')) byId('analytics-chart-bars').innerHTML = '<div style="color:var(--muted)">Failed to load data</div>';
+    }
+};
+
+})(); // <-- Notice how the fence closes down here now!
