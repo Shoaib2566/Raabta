@@ -1,10 +1,12 @@
 const request = require("supertest");
 
 let mockScenario = "default";
-let appUsersSingleCallCount = 0;
 
 const mockFrom = jest.fn((table) => {
     const chain = {
+        table,
+        operation: null,
+
         select: jest.fn(() => chain),
 
         eq: jest.fn(() => {
@@ -18,23 +20,26 @@ const mockFrom = jest.fn((table) => {
             return chain;
         }),
 
+        insert: jest.fn(() => {
+            chain.operation = "insert";
+            return chain;
+        }),
+
         single: jest.fn(() => {
             if (mockScenario === "signup-201" && table === "app_users") {
-                appUsersSingleCallCount += 1;
-
-                if (appUsersSingleCallCount === 1) {
+                if (chain.operation === "insert") {
                     return Promise.resolve({
-                        data: null,
+                        data: {
+                            user_id: 1,
+                            email: "test@example.com",
+                            role: "customer"
+                        },
                         error: null
                     });
                 }
 
                 return Promise.resolve({
-                    data: {
-                        user_id: 1,
-                        email: "test@example.com",
-                        role: "customer"
-                    },
+                    data: null,
                     error: null
                 });
             }
@@ -52,13 +57,18 @@ const mockFrom = jest.fn((table) => {
             });
         }),
 
-        insert: jest.fn(() => chain),
-        update: jest.fn(() => chain),
+        maybeSingle: jest.fn(() => {
+            return Promise.resolve({
+                data: null,
+                error: null
+            });
+        }),
+
         order: jest.fn(() => chain),
         limit: jest.fn(() => chain),
         in: jest.fn(() => chain),
         gte: jest.fn(() => chain),
-        maybeSingle: jest.fn(() => Promise.resolve({ data: null, error: null }))
+        update: jest.fn(() => chain)
     };
 
     return chain;
@@ -75,7 +85,6 @@ const app = require("../server");
 describe("Raabta Backend API Tests", () => {
     beforeEach(() => {
         mockScenario = "default";
-        appUsersSingleCallCount = 0;
         mockFrom.mockClear();
     });
 
@@ -126,7 +135,7 @@ describe("Raabta Backend API Tests", () => {
     test("404: GET /api/orders/track/:orderId should return order not found", async () => {
         mockScenario = "track-404";
 
-        const response = await request(app).get("/api/orders/track/ORD-999");
+        const response = await request(app).get("/api/orders/track/ORD-999999");
 
         expect(response.statusCode).toBe(404);
         expect(response.body.error).toBe("Order not found");
