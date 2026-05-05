@@ -612,3 +612,33 @@ body{padding-bottom:50px}
 /* Production build: preview switcher removed */
 .preview-bar{display:none!important}
 body{padding-bottom:0!important}
+
+
+/* Customer Plan - Usage Bar */
+.usage-bar-normal { background: var(--gold) !important; }
+.usage-bar-limit  { background: #DC2626 !important; }
+
+/* Admin Services - Action Button */
+.btn-svc-disable {
+    color: #DC2626 !important;
+    border-color: #DC2626 !important;
+    background: transparent !important;
+}
+.btn-svc-enable {
+    background: var(--g900) !important;
+    color: white !important;
+    border: none !important;
+}
+
+
+/* Supervisor & Admin - Dropdown Filters */
+.select-filter {
+    background-color: transparent !important;
+    cursor: pointer;
+    outline: none;
+}
+/* Ensure the options inside the dropdown have a white background so they are readable */
+.select-filter option {
+    background-color: var(--white);
+    color: var(--g900);
+}

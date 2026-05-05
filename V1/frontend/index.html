@@ -596,7 +596,17 @@
           <div class="tile"><div class="tile-label">In Progress</div><div class="tile-val" id="sup-inprogress">--</div><div class="tile-sub">Active now</div></div>
           <div class="tile"><div class="tile-label">Completed Today</div><div class="tile-val" id="sup-completed">--</div><div class="tile-sub">Since midnight</div></div>
         </div>
-        <div class="sec-head"><h3>All Orders</h3><button class="btn-outline-sm">Filter</button></div>
+        <div class="sec-head">
+          <h3>All Orders</h3>
+          <select id="s-order-filter" class="btn-outline-sm select-filter" onchange="applyOrderFilter()">
+            <option value="all">No Filter (All Orders)</option>
+            <option value="requested">Requested</option>
+            <option value="assigned">Assigned</option>
+            <option value="in_progress">In Progress</option>
+            <option value="completed">Completed</option>
+            <option value="cancelled">Cancelled</option>
+          </select>
+        </div>
         <div class="tbl-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Service</th><th>City</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
         <!-- Orders table: populated by app.js -->
         <tbody id="s-orders-tbody">

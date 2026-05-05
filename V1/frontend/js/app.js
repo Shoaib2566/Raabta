@@ -151,6 +151,9 @@ window.loadCustomerDashboard = async function() {
         const welcomeH2 = document.querySelector('#c-dash .welcome h2');
         if (welcomeH2) welcomeH2.innerHTML = `Good afternoon, ${data.profile.full_name.split(' ')[0]} 👋`;
         
+        const welcomeSub = document.getElementById('welcome-subtext') || document.querySelector('#c-dash .welcome p');
+        if (welcomeSub) welcomeSub.textContent = "Here is your account overview."
+        
         const profileInputs = document.querySelectorAll('#c-profile input');
         if (profileInputs.length >= 4) {
             profileInputs[0].value = data.profile.full_name;
@@ -299,17 +302,22 @@ window.loadCustomerPlan = async function() {
         if(byId('plan-price-display')) byId('plan-price-display').textContent = data.price;
         if(byId('plan-usage')) byId('plan-usage').innerHTML = `<strong style="color:var(--gold2)">${data.usage} / ${data.limit}</strong>`;
 
-        // 3. Animate the progress bar safely
+        // 3. Animate the progress bar safely (USING CSS CLASSES)
         const bar = byId('plan-usage-bar');
         if (bar) {
             let percentage = (data.usage / data.limit) * 100;
             if (percentage > 100) percentage = 100; // Cap at 100%
             
-            // Turn the bar red if they are at or over their limit
-            if (percentage >= 100) bar.style.background = '#DC2626'; 
-            else bar.style.background = 'var(--gold)';
+            // Toggle classes based on limit instead of inline styles
+            if (percentage >= 100) {
+                bar.classList.remove('usage-bar-normal');
+                bar.classList.add('usage-bar-limit');
+            } else {
+                bar.classList.remove('usage-bar-limit');
+                bar.classList.add('usage-bar-normal');
+            }
             
-            bar.style.width = `${percentage}%`;
+            bar.style.width = `${percentage}%`; // Width is the only inline style needed
         }
     } catch (error) {
         console.error('Plan Load Error:', error);
@@ -548,6 +556,9 @@ window.doStatus = async function() {
 // ==========================================
 // SUPERVISOR DASHBOARD FETCHERS
 // ==========================================
+// ==========================================
+// SUPERVISOR DASHBOARD FETCHERS
+// ==========================================
 window.loadSupervisorOrders = async function() {
     try {
         const tbody = document.querySelector('#s-orders tbody');
@@ -556,6 +567,9 @@ window.loadSupervisorOrders = async function() {
 
         const orders = await fetchWithAuth('/supervisor/orders');
         
+        // 1. Save the orders globally so the filter function can access them
+        window._supervisorOrders = orders;
+
         // Calculate Statistics
         let unassignedCount = 0;
         let inProgressCount = 0;
@@ -579,49 +593,67 @@ window.loadSupervisorOrders = async function() {
             tiles[2].textContent = completedTodayCount;
         }
 
-        // Render Orders Table
-        tbody.innerHTML = '';
-        if (orders.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No orders available.</td></tr>';
-            return;
-        }
+        // 2. Trigger the render function (defaults to "All Orders")
+        applyOrderFilter();
 
-        orders.forEach(order => {
-            const statusClass = {
-                'requested': 'b-amber', 'assigned': 'b-amber', 'in_progress': 'b-blue', 'completed': 'b-green', 'cancelled': 'b-gray'
-            }[order.status] || 'b-gray';
-            const displayStatus = order.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
-            const customerName = order.app_users?.full_name || 'Unknown';
-            const serviceName = order.services?.service_name || 'Service';
-
-            let actionHtml = '';
-            if (order.status !== 'completed' && order.status !== 'cancelled') {
-                const assignBtnText = order.status === 'requested' ? 'Assign' : 'Reassign';
-                const btnClass = order.status === 'requested' ? 'btn-gold-sm' : 'btn-g';
-                actionHtml = `
-                    <div class="td-actions">
-                        <button class="${btnClass}" onclick="sGoAssign('ORD-${order.order_id}', '${serviceName}')">${assignBtnText}</button>
-                        <button class="btn-outline-sm" onclick="sGoStatus('ORD-${order.order_id}')">Status</button>
-                    </div>`;
-            } else {
-                actionHtml = `<span style="font-size:.78rem;color:var(--muted)">Done</span>`;
-            }
-
-            tbody.innerHTML += `
-                <tr>
-                    <td><strong>#ORD-${order.order_id}</strong></td>
-                    <td>${customerName}</td>
-                    <td>${serviceName}</td>
-                    <td>${order.service_address || 'N/A'}</td>
-                    <td><span class="badge ${statusClass}">${displayStatus}</span></td>
-                    <td style="text-align:right">${actionHtml}</td>
-                </tr>`;
-        });
     } catch (error) {
         console.error("Supervisor Orders Load Error:", error);
     }
 };
 
+// --- NEW FUNCTION TO HANDLE FILTERING ---
+window.applyOrderFilter = function() {
+    const tbody = document.querySelector('#s-orders tbody');
+    if (!tbody) return;
+
+    // Grab the current value from the dropdown
+    const filterVal = document.getElementById('s-order-filter')?.value || 'all';
+    
+    // Filter the stored orders
+    let displayOrders = window._supervisorOrders || [];
+    if (filterVal !== 'all') {
+        displayOrders = displayOrders.filter(o => o.status === filterVal);
+    }
+
+    // Render the table with the filtered results
+    tbody.innerHTML = '';
+    if (displayOrders.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted)">No orders found for this status.</td></tr>';
+        return;
+    }
+
+    displayOrders.forEach(order => {
+        const statusClass = {
+            'requested': 'b-amber', 'assigned': 'b-amber', 'in_progress': 'b-blue', 'completed': 'b-green', 'cancelled': 'b-gray'
+        }[order.status] || 'b-gray';
+        const displayStatus = order.status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase());
+        const customerName = order.app_users?.full_name || 'Unknown';
+        const serviceName = order.services?.service_name || 'Service';
+
+        let actionHtml = '';
+        if (order.status !== 'completed' && order.status !== 'cancelled') {
+            const assignBtnText = order.status === 'requested' ? 'Assign' : 'Reassign';
+            const btnClass = order.status === 'requested' ? 'btn-gold-sm' : 'btn-g';
+            actionHtml = `
+                <div class="td-actions">
+                    <button class="${btnClass}" onclick="sGoAssign('ORD-${order.order_id}', '${serviceName}')">${assignBtnText}</button>
+                    <button class="btn-outline-sm" onclick="sGoStatus('ORD-${order.order_id}')">Status</button>
+                </div>`;
+        } else {
+            actionHtml = `<span style="font-size:.78rem;color:var(--muted)">Done</span>`;
+        }
+
+        tbody.innerHTML += `
+            <tr>
+                <td><strong>#ORD-${order.order_id}</strong></td>
+                <td>${customerName}</td>
+                <td>${serviceName}</td>
+                <td>${order.service_address || 'N/A'}</td>
+                <td><span class="badge ${statusClass}">${displayStatus}</span></td>
+                <td style="text-align:right">${actionHtml}</td>
+            </tr>`;
+    });
+};
 window.loadSupervisorProviders = async function() {
     try {
         const directoryContainer = document.querySelector('#s-providers');
@@ -1150,10 +1182,9 @@ window.loadAdminServices = async function() {
             const isActive = svc.is_enabled;
             const statusClass = isActive ? 'b-green' : 'b-amber';
             const statusText = isActive ? 'Active' : 'Inactive';
-            // Styling buttons to match your screenshot
-            const btnStyle = isActive 
-                ? 'color:#DC2626; border-color:#DC2626; background:transparent;' 
-                : 'background:var(--g900); color:white; border:none;';
+            
+            // Assign CSS classes instead of inline style strings
+            const btnClass = isActive ? 'btn-outline-sm btn-svc-disable' : 'btn-outline-sm btn-svc-enable';
             const btnText = isActive ? 'Disable' : 'Enable';
 
             tbody.innerHTML += `
@@ -1165,7 +1196,7 @@ window.loadAdminServices = async function() {
                     <td style="text-align:right">
                         <div style="display:flex; gap:0.5rem; justify-content:flex-end">
                             <button class="btn-outline-sm" onclick="editSvc(${svc.service_id}, '${svc.service_name}')">Edit</button>
-                            <button class="btn-outline-sm" style="${btnStyle}" onclick="toggleAdminSvc(${svc.service_id}, ${!isActive})">${btnText}</button>
+                            <button class="${btnClass}" onclick="toggleAdminSvc(${svc.service_id}, ${!isActive})">${btnText}</button>
                         </div>
                     </td>
                 </tr>
