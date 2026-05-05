@@ -3,12 +3,633 @@
 <head>
 <meta charset="UTF-8"/>
 <meta name="viewport" content="width=device-width,initial-scale=1.0"/>
-<title>Raabta — Your Helping Hand in Pakistan</title>
+<title>Raabta Preview — All Pages</title>
 <link rel="preconnect" href="https://fonts.googleapis.com"/>
 <link href="https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,400;0,600;0,700;0,800;1,400&family=Outfit:wght@300;400;500;600&display=swap" rel="stylesheet"/>
-<link rel="stylesheet" href="css/styles.css"/>
+<style>
+/* ═══════════════════════════════════════
+   DESIGN TOKENS
+═══════════════════════════════════════ */
+:root {
+  --g900:#0B1F14; --g800:#132A1B; --g700:#1A3823; --g600:#24502F;
+  --g500:#2E6B3E; --g400:#4A8C5C; --g300:#7AB98A;
+  --gold:#C9A84C; --gold2:#E2C47A; --gold3:#F5E6B8; --gold4:#FDF8EC;
+  --cream:#F8F4EE; --white:#FFFFFF;
+  --text:#1C1C1C; --muted:#6B7563; --border:#D9D3C3;
+  --dark-footer:#080F0A;
+  --sidebar-w:224px;
+}
+*,*::before,*::after{box-sizing:border-box;margin:0;padding:0}
+html{scroll-behavior:smooth}
+body{font-family:'Outfit',sans-serif;background:var(--cream);color:var(--text);min-height:100vh}
+
+/* PAGES */
+.page{display:none}.page.active{display:block}
+
+/* ══════════════════════════════════
+   GLOBAL BUTTONS
+══════════════════════════════════ */
+.btn-gold{padding:.45rem 1.2rem;background:var(--gold);color:var(--g900);border:none;border-radius:6px;font-size:.855rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-gold:hover{background:var(--gold2);transform:translateY(-1px)}
+.btn-ghost-nav{padding:.45rem 1.2rem;border:1.5px solid rgba(201,168,76,.45);color:var(--gold2);border-radius:6px;font-size:.855rem;font-weight:500;cursor:pointer;background:none;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-ghost-nav:hover{border-color:var(--gold);color:var(--gold);background:rgba(201,168,76,.08)}
+
+/* ══════════════════════════════════
+   NAV
+══════════════════════════════════ */
+.topnav{
+  position:sticky;top:0;z-index:200;
+  background:var(--g900);padding:0 5%;height:68px;
+  display:flex;align-items:center;justify-content:space-between;
+  border-bottom:1px solid rgba(201,168,76,.18);
+}
+.logo{font-family:'Playfair Display',serif;font-size:1.86rem;font-weight:900;color:var(--gold);letter-spacing:-.6px;cursor:pointer;line-height:1;text-shadow:0 2px 14px rgba(201,168,76,.14)}
+.logo span{color:inherit}
+.nav-links{display:flex;align-items:center;gap:2rem;list-style:none}
+.nav-links a{text-decoration:none;color:rgba(255,255,255,.55);font-size:.875rem;font-weight:500;transition:color .2s;cursor:pointer}
+.nav-links a:hover{color:var(--gold2)}
+.nav-right{display:flex;gap:.65rem;align-items:center}
+
+/* ══════════════════════════════════
+   HERO
+══════════════════════════════════ */
+.hero{
+  background:var(--g900);
+  background-image:radial-gradient(ellipse 65% 70% at 85% 50%,rgba(42,80,62,.6) 0%,transparent 65%),
+    radial-gradient(ellipse 40% 40% at 15% 80%,rgba(201,168,76,.06) 0%,transparent 70%);
+  padding:7rem 5% 6rem;
+  display:grid;grid-template-columns:1fr 1fr;gap:4rem;align-items:center;
+  min-height:calc(100vh - 68px);
+}
+.hero-badge{
+  display:inline-flex;align-items:center;gap:.5rem;
+  background:rgba(201,168,76,.1);border:1px solid rgba(201,168,76,.28);
+  color:var(--gold2);padding:.3rem .9rem;border-radius:100px;
+  font-size:.72rem;font-weight:700;letter-spacing:.6px;text-transform:uppercase;margin-bottom:1.5rem;
+}
+.hero h1{
+  font-family:'Playfair Display',serif;
+  font-size:clamp(2.4rem,4.2vw,3.6rem);font-weight:800;
+  color:var(--white);line-height:1.15;margin-bottom:1.25rem;letter-spacing:-.5px;
+}
+.hero h1 em{color:var(--gold);font-style:italic;display:block}
+.hero-tagline{
+  font-size:.8rem;font-weight:600;text-transform:uppercase;letter-spacing:1.2px;
+  color:var(--gold);margin-bottom:1rem;
+}
+.hero-sub{color:rgba(255,255,255,.52);font-size:1rem;line-height:1.75;max-width:460px;margin-bottom:2.25rem}
+.hero-cta{display:flex;gap:.85rem;align-items:center;flex-wrap:wrap}
+.btn-hero{
+  padding:.8rem 2rem;background:var(--gold);color:var(--g900);
+  border-radius:8px;font-size:.95rem;font-weight:700;cursor:pointer;border:none;
+  font-family:'Outfit',sans-serif;transition:all .25s;
+  box-shadow:0 6px 24px rgba(201,168,76,.3);
+}
+.btn-hero:hover{background:var(--gold2);transform:translateY(-2px);box-shadow:0 10px 32px rgba(201,168,76,.38)}
+.btn-hero-ghost{
+  padding:.8rem 1.5rem;color:rgba(255,255,255,.5);font-size:.95rem;
+  cursor:pointer;background:none;border:1.5px solid rgba(255,255,255,.15);
+  border-radius:8px;font-family:'Outfit',sans-serif;transition:all .2s;
+}
+.btn-hero-ghost:hover{color:var(--gold2);border-color:rgba(201,168,76,.4)}
+/* floating order cards */
+.hero-visual{display:flex;justify-content:center;align-items:center}
+.card-stack{position:relative;width:360px;height:310px}
+.hcard{
+  position:absolute;
+  background:rgba(255,255,255,.055);backdrop-filter:blur(14px);
+  border:1px solid rgba(201,168,76,.18);border-radius:16px;padding:1.4rem 1.6rem;
+}
+.hcard-a{width:275px;bottom:0;left:0}
+.hcard-b{width:258px;top:0;right:0;border-top:2px solid var(--gold)}
+.hcard-tag{font-size:.67rem;font-weight:700;letter-spacing:.5px;text-transform:uppercase;color:var(--gold2);margin-bottom:.5rem}
+.hcard-name{font-weight:600;font-size:.93rem;color:var(--white);margin-bottom:.65rem}
+.hdivider{height:1px;background:rgba(255,255,255,.1);margin:.65rem 0}
+.hrow{display:flex;justify-content:space-between;font-size:.77rem;color:rgba(255,255,255,.4)}
+.hrow strong{color:rgba(255,255,255,.78)}
+
+/* ══════════════════════════════════
+   STATS
+══════════════════════════════════ */
+.statsbar{
+  background:var(--gold);padding:2.25rem 5%;
+  display:grid;grid-template-columns:repeat(4,1fr);text-align:center;
+}
+.stat-num{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:800;color:var(--g900)}
+.stat-lbl{font-size:.8rem;font-weight:500;color:rgba(11,31,20,.6);margin-top:.1rem}
+.stat-divider{width:1px;background:rgba(11,31,20,.12);margin:auto}
+
+/* ══════════════════════════════════
+   SECTION CHROME
+══════════════════════════════════ */
+.section-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--g500);margin-bottom:.5rem}
+.section-title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--g800);margin-bottom:.7rem}
+.section-sub{color:var(--muted);max-width:520px;margin:0 auto;line-height:1.7;font-size:.95rem}
+.section-header{text-align:center;margin-bottom:3rem}
+.section-header.left{text-align:left}
+.section-header.left .section-sub{margin:0}
+
+/* ══════════════════════════════════
+   SERVICES SECTION
+══════════════════════════════════ */
+.services-section{padding:5.5rem 5%;background:var(--cream)}
+.svcs-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(245px,1fr));gap:1.4rem}
+.svc-card{
+  background:var(--white);border:1px solid var(--border);border-radius:14px;
+  padding:1.85rem 1.65rem;transition:all .25s;
+}
+.svc-card:hover{transform:translateY(-5px);box-shadow:0 14px 44px rgba(42,80,62,.12);border-color:var(--g400)}
+.svc-icon{width:48px;height:48px;background:rgba(42,80,62,.07);border-radius:12px;display:flex;align-items:center;justify-content:center;margin-bottom:1.1rem;font-size:1.35rem}
+.svc-title{font-weight:600;font-size:.975rem;color:var(--g800);margin-bottom:.4rem}
+.svc-desc{font-size:.845rem;color:var(--muted);line-height:1.65;margin-bottom:.9rem}
+.svc-tag{display:inline-block;background:var(--gold4);color:var(--g600);font-size:.72rem;font-weight:600;padding:.2rem .65rem;border-radius:100px;border:1px solid rgba(201,168,76,.3)}
+
+/* ══════════════════════════════════
+   HOW IT WORKS
+══════════════════════════════════ */
+.how-section{padding:5.5rem 5%;background:var(--g900)}
+.how-section .section-title{color:var(--white)}
+.how-section .section-label{color:var(--gold2)}
+.how-section .section-sub{color:rgba(255,255,255,.45)}
+.steps{display:grid;grid-template-columns:repeat(4,1fr);gap:1.5rem;margin-top:3rem;position:relative}
+.steps::before{content:'';position:absolute;top:26px;left:10%;right:10%;height:1px;background:rgba(201,168,76,.2)}
+.step{text-align:center;position:relative}
+.step-num{width:52px;height:52px;background:var(--gold);color:var(--g900);border-radius:50%;display:flex;align-items:center;justify-content:center;font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:800;margin:0 auto 1.1rem;position:relative;z-index:1;box-shadow:0 4px 16px rgba(201,168,76,.35)}
+.step-title{font-weight:600;color:var(--white);margin-bottom:.35rem;font-size:.95rem}
+.step-desc{font-size:.82rem;color:rgba(255,255,255,.42);line-height:1.6}
+
+/* ══════════════════════════════════
+   PRICING
+══════════════════════════════════ */
+.pricing-section{padding:5.5rem 5%;background:var(--cream)}
+.pricing-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:1.5rem}
+.price-card{
+  background:var(--white);border:1px solid var(--border);border-radius:16px;
+  padding:2rem 1.85rem;position:relative;overflow:hidden;transition:all .25s;
+}
+.price-card:hover{transform:translateY(-4px);box-shadow:0 16px 48px rgba(42,80,62,.1)}
+.price-card.featured{background:var(--g800);border-color:var(--gold);}
+.price-card.featured .plan-name{color:var(--gold2)}
+.price-card.featured .plan-price{color:var(--white)}
+.price-card.featured .plan-desc{color:rgba(255,255,255,.5)}
+.price-card.featured .plan-feature{color:rgba(255,255,255,.75);border-bottom-color:rgba(255,255,255,.08)}
+.price-card.featured .plan-feature::before{color:var(--gold)}
+.featured-badge{
+  position:absolute;top:1.2rem;right:1.2rem;
+  background:var(--gold);color:var(--g900);font-size:.68rem;font-weight:700;
+  padding:.2rem .65rem;border-radius:100px;text-transform:uppercase;letter-spacing:.4px;
+}
+.plan-name{font-size:.78rem;font-weight:700;text-transform:uppercase;letter-spacing:.8px;color:var(--g500);margin-bottom:.6rem}
+.plan-price{font-family:'Playfair Display',serif;font-size:2.4rem;font-weight:800;color:var(--g800);line-height:1}
+.plan-price span{font-family:'Outfit',sans-serif;font-size:.9rem;font-weight:400;color:var(--muted)}
+.plan-desc{font-size:.845rem;color:var(--muted);margin:.6rem 0 1.4rem;line-height:1.6}
+.plan-features{list-style:none;margin-bottom:1.75rem}
+.plan-feature{font-size:.845rem;padding:.55rem 0;border-bottom:1px solid var(--border);color:var(--text)}
+.plan-feature::before{content:'✓ ';color:var(--g500);font-weight:700}
+.btn-plan{width:100%;padding:.75rem;background:var(--g700);color:var(--white);border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.btn-plan:hover{background:var(--g900)}
+.price-card.featured .btn-plan{background:var(--gold);color:var(--g900)}
+.price-card.featured .btn-plan:hover{background:var(--gold2)}
+
+/* ══════════════════════════════════
+   ABOUT US
+══════════════════════════════════ */
+.about-section{padding:5.5rem 5%;background:var(--g900)}
+.about-grid{display:grid;grid-template-columns:1fr;gap:2rem;align-items:center;max-width:900px;margin:0 auto}
+.about-label{font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:var(--gold2);margin-bottom:.65rem}
+.about-title{font-family:'Playfair Display',serif;font-size:2.2rem;font-weight:700;color:var(--white);margin-bottom:1.25rem;line-height:1.25}
+.about-title em{color:var(--gold);font-style:italic}
+.about-body{color:rgba(255,255,255,.52);font-size:.95rem;line-height:1.8}
+.about-body p{margin-bottom:1rem}
+.about-body p:last-child{margin-bottom:0}
+.about-quote{
+  background:rgba(201,168,76,.07);border-left:3px solid var(--gold);
+  padding:1.25rem 1.5rem;border-radius:0 10px 10px 0;margin:1.5rem 0;
+  font-style:italic;color:rgba(255,255,255,.6);font-size:.92rem;line-height:1.7;
+}
+.team-grid{display:grid;grid-template-columns:1fr 1fr;gap:1rem}
+.team-card{background:rgba(255,255,255,.05);border:1px solid rgba(201,168,76,.15);border-radius:12px;padding:1.25rem}
+.team-id{font-size:.7rem;color:var(--gold2);font-weight:600;margin-bottom:.25rem}
+.team-name{font-weight:600;color:var(--white);font-size:.9rem}
+
+/* ══════════════════════════════════
+   GUEST TRACK SECTION
+══════════════════════════════════ */
+.track-section{padding:4rem 5%;background:var(--gold4);border-top:1px solid rgba(201,168,76,.25);border-bottom:1px solid rgba(201,168,76,.25)}
+.track-inner{max-width:600px;margin:0 auto;text-align:center}
+.track-inner h3{font-family:'Playfair Display',serif;font-size:1.85rem;font-weight:700;color:var(--g800);margin-bottom:.6rem}
+.track-inner p{color:var(--muted);font-size:.9rem;margin-bottom:1.75rem}
+.track-form{display:flex;gap:.75rem}
+.track-input{flex:1;padding:.75rem 1rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:'Outfit',sans-serif;outline:none;color:var(--text)}
+.track-input:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(46,107,62,.1)}
+.btn-track{padding:.75rem 1.5rem;background:var(--g700);color:var(--white);border:none;border-radius:8px;font-size:.9rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;white-space:nowrap;transition:background .2s}
+.btn-track:hover{background:var(--g900)}
+
+/* ══════════════════════════════════
+   FOOTER
+══════════════════════════════════ */
+footer{background:var(--dark-footer);padding:4rem 5% 0;border-top:1px solid rgba(201,168,76,.12)}
+.footer-grid{display:grid;grid-template-columns:1.6fr 1fr 1fr 1fr;gap:2.5rem;padding-bottom:3rem}
+.footer-logo{font-family:'Playfair Display',serif;font-size:1.7rem;font-weight:900;color:var(--gold);letter-spacing:-.45px;margin-bottom:.75rem;line-height:1}
+.footer-logo span{color:inherit}
+.footer-tagline{color:var(--gold2);font-size:.78rem;font-weight:600;text-transform:uppercase;letter-spacing:.8px;margin-bottom:.75rem}
+.footer-blurb{color:rgba(255,255,255,.3);font-size:.835rem;line-height:1.7;max-width:240px}
+.footer-col h4{color:rgba(255,255,255,.3);font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;margin-bottom:.9rem}
+.footer-col a{display:block;color:rgba(255,255,255,.45);font-size:.855rem;text-decoration:none;margin-bottom:.55rem;transition:color .2s;cursor:pointer}
+.footer-col a:hover{color:var(--gold2)}
+.pay-badges{display:flex;gap:.5rem;margin-top:.75rem;flex-wrap:wrap}
+.pay-badge{background:rgba(255,255,255,.07);border:1px solid rgba(255,255,255,.1);border-radius:6px;padding:.3rem .75rem;font-size:.75rem;color:rgba(255,255,255,.5);font-weight:500}
+.footer-bottom{border-top:1px solid rgba(255,255,255,.06);padding:1.5rem 0;text-align:center;color:rgba(255,255,255,.22);font-size:.78rem}
+
+/* ══════════════════════════════════
+   AUTH PAGE
+══════════════════════════════════ */
+.auth-page{background:var(--g900);min-height:100vh;display:flex;flex-direction:column}
+.auth-nav{padding:0 5%;height:64px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid rgba(201,168,76,.12)}
+.auth-body{flex:1;display:flex;align-items:center;justify-content:center;padding:3rem 1.5rem;position:relative;overflow:hidden}
+.auth-bg-orb{position:absolute;border-radius:50%;filter:blur(90px);pointer-events:none}
+.auth-orb1{width:500px;height:500px;background:rgba(42,80,62,.35);top:-120px;right:-100px}
+.auth-orb2{width:350px;height:350px;background:rgba(201,168,76,.05);bottom:-80px;left:-80px}
+.auth-card{background:var(--white);border-radius:20px;width:100%;max-width:435px;overflow:hidden;box-shadow:0 32px 80px rgba(0,0,0,.45);position:relative;z-index:1}
+.auth-head{background:var(--g800);padding:2rem 2.5rem 1.75rem;text-align:center;border-bottom:2px solid var(--gold)}
+.auth-head h2{font-family:'Playfair Display',serif;font-size:1.9rem;font-weight:700;color:var(--white);margin-bottom:.3rem}
+.auth-head p{color:rgba(255,255,255,.4);font-size:.855rem}
+.auth-tabs{display:flex;background:rgba(255,255,255,.07);border-radius:8px;padding:4px;margin-top:1.15rem}
+.auth-tab{flex:1;padding:.48rem;border:none;border-radius:6px;background:none;color:rgba(255,255,255,.45);font-size:.855rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.auth-tab.active{background:var(--gold);color:var(--g900);font-weight:700}
+.auth-body-card{padding:2rem 2.5rem}
+.afield{margin-bottom:1.1rem}
+.afield label{display:block;font-size:.77rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem}
+.afield input,.afield select{width:100%;padding:.65rem .95rem;border:1.5px solid var(--border);border-radius:8px;font-size:.9rem;font-family:'Outfit',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color .2s}
+.afield input:focus,.afield select:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(46,107,62,.09)}
+.forgot-link{display:block;text-align:right;font-size:.78rem;color:var(--g500);text-decoration:none;margin-top:.3rem}
+.forgot-link:hover{color:var(--gold)}
+.btn-auth{width:100%;padding:.8rem;background:var(--g700);color:var(--white);border:none;border-radius:8px;font-size:.95rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s;margin-top:.5rem}
+.btn-auth:hover{background:var(--g900)}
+.auth-switch{text-align:center;font-size:.83rem;color:var(--muted);margin-top:.9rem}
+.auth-switch a{color:var(--g500);text-decoration:none;font-weight:600;cursor:pointer}
+.auth-switch a:hover{color:var(--gold)}
+.auth-panel{display:none}.auth-panel.active{display:block}
+
+/* ══════════════════════════════════
+   DASHBOARD SHARED
+══════════════════════════════════ */
+.dash-layout{display:flex;min-height:100vh}
+.sidebar{width:var(--sidebar-w);background:var(--g800);min-height:100vh;display:flex;flex-direction:column;position:fixed;top:0;left:0;z-index:100;border-right:1px solid rgba(201,168,76,.1)}
+.sb-logo{padding:1.4rem 1.5rem 1rem;font-family:'Playfair Display',serif;font-size:1.64rem;font-weight:900;color:var(--gold);letter-spacing:-.55px;border-bottom:1px solid rgba(201,168,76,.1);line-height:1;text-shadow:0 2px 14px rgba(201,168,76,.12)}
+.sb-logo span{color:inherit}
+.sb-role{font-size:.67rem;font-weight:700;text-transform:uppercase;letter-spacing:1px;color:rgba(255,255,255,.26);padding:.85rem 1.5rem .4rem}
+.sb-nav{flex:1;padding:.4rem 0}
+.sb-link{display:flex;align-items:center;gap:.7rem;padding:.68rem 1.5rem;color:rgba(255,255,255,.42);text-decoration:none;font-size:.855rem;font-weight:500;transition:all .2s;border-left:3px solid transparent;cursor:pointer}
+.sb-link:hover{color:var(--gold2);background:rgba(201,168,76,.05)}
+.sb-link.active{color:var(--gold);background:rgba(201,168,76,.1);border-left-color:var(--gold)}
+.sb-link svg{width:16px;height:16px;stroke:currentColor;fill:none;stroke-width:1.8;flex-shrink:0}
+.sb-footer{padding:.9rem 1.5rem;border-top:1px solid rgba(201,168,76,.1)}
+.sb-footer button{background:none;border:none;color:rgba(255,255,255,.3);font-size:.8rem;cursor:pointer;font-family:'Outfit',sans-serif}
+.sb-footer button:hover{color:var(--gold2)}
+.dash-main{margin-left:var(--sidebar-w);flex:1;display:flex;flex-direction:column}
+.dash-topbar{background:var(--white);border-bottom:1px solid var(--border);padding:0 2rem;height:62px;display:flex;align-items:center;justify-content:space-between;position:sticky;top:0;z-index:50}
+.dash-topbar h2{font-family:'Playfair Display',serif;font-size:1.4rem;font-weight:700;color:var(--g800)}
+.tb-right{display:flex;align-items:center;gap:.85rem}
+.tb-notif{width:34px;height:34px;border:1.5px solid var(--border);border-radius:8px;display:flex;align-items:center;justify-content:center;color:var(--muted);cursor:pointer;transition:all .2s}
+.tb-notif:hover{border-color:var(--g500);color:var(--g500)}
+.tb-avatar{width:34px;height:34px;background:var(--g600);border-radius:50%;display:flex;align-items:center;justify-content:center;color:var(--white);font-size:.78rem;font-weight:700}
+.dash-content{padding:2rem;flex:1}
+.dsection{display:none}.dsection.active{display:block}
+
+/* TILES */
+.tile-row{display:grid;grid-template-columns:repeat(auto-fill,minmax(175px,1fr));gap:1.15rem;margin-bottom:2rem}
+.tile{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.2rem 1.4rem}
+.tile-label{font-size:.73rem;font-weight:700;color:var(--muted);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.35rem}
+.tile-val{font-family:'Playfair Display',serif;font-size:2rem;font-weight:700;color:var(--g800)}
+.tile-sub{font-size:.75rem;color:var(--muted);margin-top:.15rem}
+.tile.gold-tile{background:var(--g800);border-color:rgba(201,168,76,.2)}
+.tile.gold-tile .tile-label{color:var(--gold2)}
+.tile.gold-tile .tile-val{color:var(--gold)}
+.tile.gold-tile .tile-sub{color:rgba(255,255,255,.4)}
+
+/* SEC HEAD */
+.sec-head{display:flex;align-items:center;justify-content:space-between;margin-bottom:1rem}
+.sec-head h3{font-size:.975rem;font-weight:600;color:var(--g800)}
+
+/* BUTTONS (dashboard) */
+.btn-g{padding:.42rem 1rem;background:var(--g700);color:var(--white);border:none;border-radius:6px;font-size:.815rem;font-weight:600;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.btn-g:hover{background:var(--g900)}
+.btn-gold-sm{padding:.42rem 1rem;background:var(--gold);color:var(--g900);border:none;border-radius:6px;font-size:.815rem;font-weight:700;cursor:pointer;font-family:'Outfit',sans-serif;transition:background .2s}
+.btn-gold-sm:hover{background:var(--gold2)}
+.btn-outline-sm{padding:.42rem 1rem;background:none;color:var(--g600);border:1.5px solid var(--g600);border-radius:6px;font-size:.815rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-outline-sm:hover{background:var(--g600);color:var(--white)}
+.btn-danger-sm{padding:.42rem 1rem;background:none;color:#C0392B;border:1.5px solid #C0392B;border-radius:6px;font-size:.815rem;font-weight:500;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.btn-danger-sm:hover{background:#C0392B;color:var(--white)}
+
+/* BADGES */
+.badge{display:inline-block;padding:.18rem .62rem;border-radius:100px;font-size:.7rem;font-weight:700}
+.b-green{background:#D1FAE5;color:#065F46}
+.b-amber{background:#FEF3C7;color:#92400E}
+.b-blue{background:#DBEAFE;color:#1E40AF}
+.b-red{background:#FEE2E2;color:#991B1B}
+.b-gray{background:#F3F4F6;color:#374151}
+.b-purple{background:#EDE9FE;color:#5B21B6}
+
+/* TABLE */
+.tbl-wrap{background:var(--white);border:1px solid var(--border);border-radius:14px;overflow:hidden}
+table{width:100%;border-collapse:collapse;font-size:.855rem}
+thead th{text-align:left;padding:.6rem 1rem;font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.4px;color:var(--muted);border-bottom:1px solid var(--border);background:#FAFAF8}
+tbody tr{border-bottom:1px solid var(--border);transition:background .15s}
+tbody tr:last-child{border-bottom:none}
+tbody tr:hover{background:var(--gold4)}
+tbody td{padding:.72rem 1rem;vertical-align:middle}
+.td-actions{display:flex;gap:.5rem;justify-content:flex-end}
+
+/* CARDS GRID */
+.card-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(215px,1fr));gap:1.15rem;margin-bottom:1.5rem}
+.mini-svc{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.25rem}
+.mini-svc-title{font-weight:600;font-size:.93rem;color:var(--g800);margin-bottom:.35rem}
+.mini-svc-desc{font-size:.815rem;color:var(--muted);line-height:1.55;margin-bottom:.85rem}
+
+/* ORDER CARDS */
+.order-list{display:flex;flex-direction:column;gap:.7rem;margin-bottom:1.5rem}
+.ord-card{background:var(--white);border:1px solid var(--border);border-radius:11px;padding:1.1rem 1.25rem;display:flex;align-items:center;justify-content:space-between;gap:1rem}
+.ord-id{font-size:.75rem;color:var(--muted);margin-bottom:.25rem}
+.ord-name{font-weight:600;font-size:.93rem;color:var(--g800)}
+
+/* WELCOME BANNER */
+.welcome{
+  background:linear-gradient(135deg,var(--g800) 0%,var(--g700) 100%);
+  border-radius:14px;padding:1.65rem 2rem;margin-bottom:2rem;
+  display:flex;align-items:center;justify-content:space-between;
+  border:1px solid rgba(201,168,76,.18);
+}
+.welcome h2{font-family:'Playfair Display',serif;font-size:1.5rem;color:var(--white);margin-bottom:.25rem}
+.welcome p{color:rgba(255,255,255,.45);font-size:.855rem}
+
+/* FORM ELEMENTS */
+.field-row{display:flex;gap:1rem;align-items:flex-end;flex-wrap:wrap;margin-bottom:1rem}
+.field-g{flex:1;min-width:150px}
+.field-g label{display:block;font-size:.77rem;font-weight:700;color:var(--g700);text-transform:uppercase;letter-spacing:.4px;margin-bottom:.4rem}
+.field-g select,.field-g input{width:100%;padding:.6rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-size:.875rem;font-family:'Outfit',sans-serif;color:var(--text);background:var(--white);outline:none;transition:border-color .2s}
+.field-g select:focus,.field-g input:focus{border-color:var(--g500);box-shadow:0 0 0 3px rgba(46,107,62,.09)}
+.info-block{background:var(--gold4);border:1px solid rgba(201,168,76,.3);border-left:3px solid var(--gold);border-radius:10px;padding:.95rem 1.2rem;margin-bottom:1.2rem}
+.info-block .ib-label{font-size:.7rem;font-weight:700;text-transform:uppercase;letter-spacing:.5px;color:var(--g600);margin-bottom:.25rem}
+.info-block .ib-val{font-weight:600;font-size:.93rem;color:var(--g800)}
+.card-panel{background:var(--white);border:1px solid var(--border);border-radius:14px;padding:1.5rem;margin-bottom:1.25rem}
+
+/* CHART BARS */
+.bar-row{display:flex;align-items:center;gap:.7rem;margin-bottom:.7rem}
+.bar-lbl{font-size:.78rem;color:var(--muted);width:110px;flex-shrink:0}
+.bar-track{flex:1;height:9px;background:var(--border);border-radius:100px;overflow:hidden}
+.bar-fill{height:100%;background:var(--g500);border-radius:100px}
+.bar-val{font-size:.78rem;font-weight:600;color:var(--g800);width:30px;text-align:right}
+
+/* MODALS */
+.modal-bg{display:none;position:fixed;inset:0;background:rgba(0,0,0,.55);z-index:500;align-items:center;justify-content:center}
+.modal-bg.open{display:flex}
+.modal{background:var(--white);border-radius:18px;padding:2rem;width:100%;max-width:440px;box-shadow:0 32px 80px rgba(0,0,0,.25)}
+.modal h3{font-family:'Playfair Display',serif;font-size:1.45rem;color:var(--g800);margin-bottom:1.25rem}
+.modal-close{float:right;background:none;border:none;font-size:1.1rem;cursor:pointer;color:var(--muted);margin-top:-.2rem}
+.modal textarea{width:100%;padding:.62rem .9rem;border:1.5px solid var(--border);border-radius:8px;font-family:'Outfit',sans-serif;font-size:.875rem;resize:vertical;outline:none}
+.modal textarea:focus{border-color:var(--g500)}
+.stars{display:flex;gap:.35rem;margin:.65rem 0}
+.star{font-size:1.6rem;cursor:pointer;color:var(--border);transition:color .15s}
+.star.lit{color:var(--gold)}
+
+/* PROVIDER PANEL */
+.provider-card{background:var(--white);border:1px solid var(--border);border-radius:12px;padding:1.15rem 1.3rem;display:flex;align-items:center;justify-content:space-between;gap:1rem;margin-bottom:.7rem}
+.prov-name{font-weight:600;font-size:.93rem;color:var(--g800)}
+.prov-detail{font-size:.78rem;color:var(--muted);margin-top:.2rem}
+
+/* ANIMATIONS */
+@keyframes fadeUp{from{opacity:0;transform:translateY(18px)}to{opacity:1;transform:translateY(0)}}
+.hero-content>*{animation:fadeUp .65s ease both}
+.hero-content>*:nth-child(1){animation-delay:.05s}
+.hero-content>*:nth-child(2){animation-delay:.15s}
+.hero-content>*:nth-child(3){animation-delay:.28s}
+.hero-content>*:nth-child(4){animation-delay:.4s}
+.hero-visual{animation:fadeUp .7s .25s ease both}
+.dsection.active{animation:fadeUp .3s ease}
+
+/* PREVIEW BAR */
+.preview-bar{
+  position:fixed;bottom:0;left:0;right:0;z-index:9999;
+  background:var(--g900);border-top:2px solid var(--gold);
+  padding:.55rem 2rem;display:flex;align-items:center;gap:.65rem;flex-wrap:wrap;
+}
+.preview-bar span{color:rgba(255,255,255,.35);font-size:.72rem;font-weight:700;text-transform:uppercase;letter-spacing:.6px;margin-right:.4rem}
+.pb-btn{padding:.32rem .85rem;border:1px solid rgba(201,168,76,.3);color:rgba(255,255,255,.5);background:none;border-radius:5px;font-size:.75rem;cursor:pointer;font-family:'Outfit',sans-serif;transition:all .2s}
+.pb-btn:hover,.pb-btn.cur{background:var(--gold);color:var(--g900);border-color:var(--gold);font-weight:700}
+body{padding-bottom:50px}
+
+
+/* MOBILE RESPONSIVE FIXES */
+@media (max-width: 900px){
+  html,body{width:100%;overflow-x:hidden}
+  .navbar{height:auto;min-height:72px;padding:.85rem 1rem;gap:.85rem;align-items:flex-start;flex-wrap:wrap}
+  .nav-left{width:100%;display:flex;justify-content:space-between;align-items:center}
+  .nav-links{order:3;width:100%;display:flex;gap:.35rem;overflow-x:auto;padding:.2rem 0 .1rem;scrollbar-width:none}
+  .nav-links::-webkit-scrollbar{display:none}
+  .nav-links li{flex:0 0 auto}
+  .nav-links a{font-size:.82rem;padding:.48rem .7rem;border:1px solid rgba(201,168,76,.12);border-radius:999px;background:rgba(255,255,255,.035)}
+  .nav-right{width:100%;display:flex;gap:.55rem;justify-content:stretch}
+  .nav-right button{flex:1;padding:.62rem .75rem;font-size:.84rem}
+  .logo{font-size:1.62rem}
+  .hero{padding:8.25rem 1.05rem 3.5rem;min-height:auto}
+  .hero-grid{grid-template-columns:1fr;gap:2.2rem}
+  .hero-copy{text-align:left}
+  .hero-title{font-size:clamp(2.15rem,12vw,3.2rem);line-height:1.02;letter-spacing:-1.5px}
+  .hero-sub{font-size:.98rem;max-width:100%}
+  .hero-cta{display:grid;grid-template-columns:1fr;gap:.8rem;width:100%}
+  .btn-hero{width:100%;justify-content:center;padding:.95rem 1rem}
+  .hero-card{padding:1.15rem;border-radius:20px;transform:none!important;max-width:100%}
+  section,.services-section,.pricing-section,.about-section,.track-section{padding-left:1rem!important;padding-right:1rem!important}
+  .section-title,.about-title{font-size:clamp(2rem,9vw,2.7rem)}
+  .section-sub{font-size:.95rem}
+  .svcs-grid,.pricing-grid,.stats-grid,.analytics-grid,.mini-svcs{grid-template-columns:1fr!important}
+  .svc-card,.price-card,.card-panel{padding:1.15rem;border-radius:18px}
+  .track-box{padding:1rem;flex-direction:column;align-items:stretch;border-radius:18px}
+  .track-input{width:100%;min-width:0}
+  .footer-grid{grid-template-columns:1fr!important;gap:1.75rem}
+  .auth-wrap{grid-template-columns:1fr;min-height:auto;padding:7rem 1rem 3rem}
+  .auth-info{display:none}
+  .auth-card{width:100%;padding:1.2rem;border-radius:18px}
+  .form-row{grid-template-columns:1fr!important}
+  .dash-layout{grid-template-columns:1fr;min-height:auto}
+  .sidebar{position:relative;width:100%;height:auto;min-height:auto;border-right:none;border-bottom:1px solid rgba(201,168,76,.12)}
+  .sb-logo{font-size:1.5rem;padding:1rem 1rem .8rem;text-align:left}
+  .sb-nav{display:flex;gap:.45rem;overflow-x:auto;padding:.75rem 1rem;scrollbar-width:none}
+  .sb-nav::-webkit-scrollbar{display:none}
+  .sb-link{flex:0 0 auto;white-space:nowrap;padding:.72rem .85rem;border-radius:999px;font-size:.82rem}
+  .sb-link svg{width:16px;height:16px}
+  .main-area{margin-left:0;padding:1rem;min-width:0}
+  .topbar-d{position:sticky;top:0;z-index:20;margin:-1rem -1rem 1rem;padding:1rem;display:flex;gap:.85rem;align-items:flex-start;flex-direction:column}
+  .topbar-d h2{font-size:1.45rem}
+  .dash-grid{grid-template-columns:1fr!important;gap:1rem}
+  .tile{padding:1rem;border-radius:16px}
+  .tbl-wrap{overflow-x:auto;-webkit-overflow-scrolling:touch;border-radius:16px}
+  table{min-width:680px}
+  .td-actions{flex-wrap:wrap}
+  .modal-box{width:calc(100vw - 2rem);padding:1rem;border-radius:18px}
+  .preview-bar{left:.6rem;right:.6rem;bottom:.6rem;width:auto;max-width:none;padding:.45rem;justify-content:flex-start;overflow-x:auto;border-radius:999px;scrollbar-width:none}
+  .preview-bar::-webkit-scrollbar{display:none}
+  .preview-bar span{display:none}
+  .pb-btn{flex:0 0 auto;padding:.55rem .75rem;font-size:.75rem}
+  body{padding-bottom:68px}
+}
+@media (max-width: 480px){
+  .navbar{padding:.75rem .85rem}
+  .hero{padding-top:9rem}
+  .hero-title{font-size:2.35rem}
+  .badge-hero{font-size:.72rem;padding:.45rem .7rem}
+  .section-label,.about-label{font-size:.72rem}
+  .price-card.featured{transform:none}
+  .plan-price{font-size:2.35rem}
+  .main-area{padding:.85rem}
+  .topbar-d{margin:-.85rem -.85rem .85rem;padding:.85rem}
+  .sb-logo{padding:.95rem .85rem .65rem}
+  .sb-nav{padding:.65rem .85rem}
+  .card-panel,.svc-card,.price-card,.tile{padding:1rem}
+  .btn-g,.btn-plan,.btn-outline,.btn-outline-sm,.btn-danger-sm{min-height:42px}
+}
+
+
+
+/* =========================================================
+   HERO MOTTO + CENTER ALIGNMENT PATCH
+   ========================================================= */
+.hero{
+  grid-template-columns: minmax(0, 920px);
+  justify-content: center;
+  text-align: center;
+  padding-top: 6.25rem;
+  padding-bottom: 6.25rem;
+}
+.hero-content{
+  max-width: 860px;
+  margin: 0 auto;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+.hero-motto{
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--gold2);
+  font-size: clamp(1rem, 2.1vw, 1.55rem);
+  font-weight: 800;
+  letter-spacing: .18em;
+  line-height: 1.35;
+  text-align: center;
+  text-transform: uppercase;
+  margin: 0 auto 1.65rem;
+  padding: .62rem 1.2rem;
+  border-top: 1px solid rgba(201,168,76,.32);
+  border-bottom: 1px solid rgba(201,168,76,.32);
+  text-shadow: 0 3px 18px rgba(201,168,76,.18);
+}
+.hero-sub{margin-left:auto;margin-right:auto;max-width:640px}
+.hero-cta{justify-content:center}
+.hero-visual{display:none}
+
+@media (max-width: 768px){
+  .hero{
+    grid-template-columns: 1fr;
+    justify-content: center;
+    text-align: center;
+    padding: 4rem 1rem 4.25rem;
+  }
+  .hero-content{align-items:center;max-width:100%}
+  .hero-motto{
+    font-size: clamp(.95rem, 4.8vw, 1.25rem);
+    letter-spacing: .12em;
+    padding: .55rem .75rem;
+    margin-bottom: 1.35rem;
+  }
+  .hero h1{text-align:center}
+  .hero-sub{text-align:center}
+  .hero-cta{width:100%}
+}
+
+
+
+/* =========================================================
+   FINAL RESPONSIVE NAV PATCH — uses actual .topnav markup
+   Fixes cramped mobile navbar and single auth button sizing
+   ========================================================= */
+.nav-auth-btn{white-space:nowrap;min-width:132px;text-align:center}
+@media (max-width: 900px){
+  .topnav{
+    height:auto;
+    min-height:64px;
+    padding:.72rem 1rem .82rem;
+    display:grid;
+    grid-template-columns:minmax(0,1fr) auto;
+    grid-template-areas:
+      "logo action"
+      "links links";
+    align-items:center;
+    gap:.62rem .75rem;
+  }
+  .topnav .logo{grid-area:logo;font-size:1.55rem;min-width:0}
+  .topnav .nav-right{grid-area:action;width:auto;display:flex;justify-content:flex-end;gap:0}
+  .topnav .nav-right button{width:auto;padding:.58rem .9rem;font-size:.82rem;border-radius:999px;box-shadow:none}
+  .topnav .nav-links{
+    grid-area:links;
+    width:100%;
+    display:flex;
+    align-items:center;
+    gap:.45rem;
+    overflow-x:auto;
+    padding:.08rem 0 .12rem;
+    list-style:none;
+    scrollbar-width:none;
+    -webkit-overflow-scrolling:touch;
+  }
+  .topnav .nav-links::-webkit-scrollbar{display:none}
+  .topnav .nav-links li{flex:0 0 auto}
+  .topnav .nav-links a{
+    display:block;
+    white-space:nowrap;
+    font-size:.8rem;
+    padding:.46rem .72rem;
+    border:1px solid rgba(201,168,76,.18);
+    border-radius:999px;
+    background:rgba(255,255,255,.035);
+    color:rgba(255,255,255,.72);
+  }
+  .hero{padding-top:4.4rem}
+  .statsbar{grid-template-columns:1fr 1fr;gap:1.2rem;padding:1.8rem 1rem}
+  .stat-divider{display:none}
+  .steps{grid-template-columns:1fr;gap:1.6rem}
+  .steps::before{display:none}
+  .pricing-grid{grid-template-columns:1fr}
+  .track-form{flex-direction:column}
+  .dash-main{margin-left:0}
+  .dash-content{padding:1rem}
+  .dash-topbar{padding:0 1rem}
+  .ord-card,.provider-card,.welcome{align-items:flex-start;flex-direction:column}
+  .welcome .btn-gold-sm{width:100%}
+}
+@media (max-width: 420px){
+  .topnav{padding:.68rem .82rem .78rem;gap:.55rem}
+  .topnav .logo{font-size:1.42rem}
+  .topnav .nav-right button{padding:.52rem .72rem;font-size:.78rem;min-width:116px}
+  .topnav .nav-links a{font-size:.76rem;padding:.42rem .62rem}
+  .hero{padding-top:3.6rem}
+}
+
+
+/* Production build: preview switcher removed */
+.preview-bar{display:none!important}
+body{padding-bottom:0!important}
+
+/* Preview-only override: production CSS hides the preview bar, so this re-enables it only here. */
+.preview-bar{display:flex!important}
+body{padding-bottom:58px!important}
+
+</style>
 </head>
 <body>
+
 
 <!-- ══════════════════════════════════════════════════════
      PAGE 1 — HOME
@@ -80,41 +701,43 @@
     <div class="svc-card">
       <div class="svc-icon">🏦</div>
       <div class="svc-title">Bill Payments & Banking</div>
-      <div class="svc-desc">LESCO, SNGPL, PTCL, water bills — paid on your behalf. Local fund transfers. Bank errands handled by verified agents.</div>
-      
+      <div class="svc-desc">LESCO, SNGPL, PTCL, water bills — paid on your behalf. Online banking services. Local fund transfer services. Bank errands handled by verified agents.</div>
+      <span class="svc-tag">Most Requested — 82%</span>
     </div>
     <div class="svc-card">
       <div class="svc-icon">🔧</div>
       <div class="svc-title">Home Maintenance & Repair</div>
       <div class="svc-desc">Plumbing, electrical, carpentry, AC servicing — certified technicians assigned and supervised.</div>
-      
+      <span class="svc-tag">71% of users need this</span>
     </div>
     <div class="svc-card">
       <div class="svc-icon">📦</div>
       <div class="svc-title">Delivery & Logistics</div>
-      <div class="svc-desc">Documents, packages, and items delivered across the city with real order tracking.</div>
-      
+      <div class="svc-desc">Documents, packages, and items delivered across the country with real order tracking. Same day within city delivery available in Islamabad, Lahore and Karachi.</div>
+      <span class="svc-tag">65% demand</span>
     </div>
     <div class="svc-card">
       <div class="svc-icon">🏥</div>
       <div class="svc-title">Elderly Care & Support</div>
       <div class="svc-desc">Companion visits, medication pickups, doctor accompaniment — care for parents you can't be there for.</div>
+      <span class="svc-tag">Underserved — 48%</span>
     </div>
     <div class="svc-card">
       <div class="svc-icon">⚖️</div>
       <div class="svc-title">Legal Assistance</div>
       <div class="svc-desc">Property matters, documentation, affidavits, and legal consultations handled by licensed professionals.</div>
+      <span class="svc-tag">35% demand</span>
     </div>
     <div class="svc-card">
       <div class="svc-icon">🎨</div>
       <div class="svc-title">Renovation & Painting</div>
       <div class="svc-desc">Interior and exterior painters, renovation teams — supervised and tracked from placement to completion.</div>
-    
+      <span class="svc-tag">Available now</span>
     </div>
     <div class="svc-card"><div class="svc-icon">🎉</div><div class="svc-title">Event Planning</div><div class="svc-desc">Birthdays, family gatherings, venue coordination, catering support, and on-ground arrangements handled locally.</div></div>
-    <div class="svc-card"><div class="svc-icon">🤲</div><div class="svc-title">Charity & Donations</div><div class="svc-desc">Coordinate verified charity deliveries, ration drives, donations, and community support tasks with proof of completion.</div></div>
-    <div class="svc-card"><div class="svc-icon">🛍️</div><div class="svc-title">Shopping Assistance</div><div class="svc-desc">Groceries, gifts, household items, and local purchases arranged and delivered for your family back home.</div></div>
-    <div class="svc-card"><div class="svc-icon">✨</div><div class="svc-title">Others / Miscellaneous</div><div class="svc-desc">Have a custom request that does not fit a category? Submit it and a supervisor will review the best way to help.</div></div>
+    <div class="svc-card"><div class="svc-icon">🤲</div><div class="svc-title">Charity & Donations</div><div class="svc-desc">Verified charity deliveries, ration drives, donations, and community support tasks with proof of completion.</div><span class="svc-tag">Community support</span></div>
+    <div class="svc-card"><div class="svc-icon">🛍️</div><div class="svc-title">Shopping Assistance</div><div class="svc-desc">Groceries, gifts, household items, and local purchases arranged and delivered for your family back home.</div><span class="svc-tag">Everyday help</span></div>
+    <div class="svc-card"><div class="svc-icon">✨</div><div class="svc-title">Others / Miscellaneous</div><div class="svc-desc">Have a custom request that does not fit a category? Submit it and a supervisor will review the best way to help.</div><span class="svc-tag">Custom requests</span></div>
   </div>
 </section>
 
@@ -281,9 +904,8 @@
     <div class="dash-topbar">
       <h2 id="c-title">Dashboard</h2>
       <div class="tb-right">
-
-
-        <!-- customer avatar: filled by app.js -->
+        <div class="tb-notif"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+        <!-- Avatar initials: filled by app.js using user.initials -->
         <div class="tb-avatar" id="user-avatar">--</div>
       </div>
     </div>
@@ -337,14 +959,14 @@
         <div class="card-grid">
           <div class="mini-svc"><div class="mini-svc-title">🏦 Bill Payments & Banking</div><div class="mini-svc-desc">Utility bills, bank errands, CNIC renewals handled by verified agents.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
           <div class="mini-svc"><div class="mini-svc-title">🔧 Home Maintenance</div><div class="mini-svc-desc">Plumbing, electrical, carpentry, AC — certified technicians nationwide.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
-          <div class="mini-svc"><div class="mini-svc-title">📦 Delivery & Logistics</div><div class="mini-svc-desc">Same day and scheduled deliveries across major cities. Intercity deliveries available.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+          <div class="mini-svc"><div class="mini-svc-title">📦 Delivery & Logistics</div><div class="mini-svc-desc">Same-day and scheduled deliveries across major cities. Intercity deliveries incl.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
           <div class="mini-svc"><div class="mini-svc-title">🏥 Elderly Care</div><div class="mini-svc-desc">Companion visits, medication pickups, doctor accompaniment for parents.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
           <div class="mini-svc"><div class="mini-svc-title">⚖️ Legal Assistance</div><div class="mini-svc-desc">Property matters, documents, affidavits by licensed professionals.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
           <div class="mini-svc"><div class="mini-svc-title">🎨 Renovation & Painting</div><div class="mini-svc-desc">Interior and exterior painting, renovation teams, supervised delivery.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
           <div class="mini-svc"><div class="mini-svc-title">🎉 Event Planning</div><div class="mini-svc-desc">Venue, catering, decor, and coordination for family events back home.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
           <div class="mini-svc"><div class="mini-svc-title">🤲 Charity & Donations</div><div class="mini-svc-desc">Arrange verified donations, ration drives, and community support tasks.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
           <div class="mini-svc"><div class="mini-svc-title">🛍️ Shopping Assistance</div><div class="mini-svc-desc">Groceries, gifts, household items, and local purchases delivered reliably.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
-          <div class="mini-svc"><div class="mini-svc-title">✨ Others / Miscellaneous</div><div class="mini-svc-desc">If you have something unique in mind, submit a custom request and a supervisor will review it.</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
+          <div class="mini-svc"><div class="mini-svc-title">✨ Others / Miscellaneous</div><div class="mini-svc-desc">If you have something unique in mind, submit a custom request and a supervisor will review it.\</div><button class="btn-g" style="width:100%" onclick="cShow('c-neworder',null)">Request</button></div>
         </div>
       </div>
 
@@ -451,99 +1073,72 @@
 
       <!-- ANALYTICS -->
       <div class="dsection" id="a-analytics">
-        <div class="tile-row" style="margin-bottom: 1.5rem; gap: 1.25rem;">
-          <!-- Tile 1 -->
-          <div class="tile" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; flex: 1;">
-              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--g600); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Total Orders</div>
-              <div id="analytics-total-orders" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: var(--g900); line-height: 1.2;">--</div>
-              <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem;">All time</div>
-          </div>
-          <!-- Tile 2 -->
-          <div class="tile" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; flex: 1;">
-              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--g600); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Active Users</div>
-              <div id="analytics-active-users" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: var(--g900); line-height: 1.2;">--</div>
-              <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem;">Registered customers</div>
-          </div>
-          <!-- Tile 3 -->
-          <div class="tile" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; flex: 1;">
-              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: var(--g600); margin-bottom: 0.5rem; letter-spacing: 0.5px;">Providers</div>
-              <div id="analytics-providers" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: var(--g900); line-height: 1.2;">--</div>
-              <div style="font-size: 0.8rem; color: var(--muted); margin-top: 0.4rem;">Verified</div>
-          </div>
-          <!-- Tile 4 (Revenue) -->
-          <div class="tile" style="padding: 1.5rem; background: #1C3024; border: none; border-radius: 8px; flex: 1; box-shadow: 0 4px 12px rgba(0,0,0,0.08);">
-              <div style="font-size: 0.75rem; font-weight: 700; text-transform: uppercase; color: #D4B254; margin-bottom: 0.5rem; letter-spacing: 0.5px;">Revenue</div>
-              <div id="analytics-revenue" style="font-family: 'Playfair Display', serif; font-size: 2.2rem; font-weight: 800; color: #D4B254; line-height: 1.2;">--</div>
-              <div style="font-size: 0.8rem; color: rgba(255,255,255,0.6); margin-top: 0.4rem;">USD this month</div>
-          </div>
+        <div class="tile-row">
+          <!-- Analytics tiles: filled by app.js -->
+          <div class="tile"><div class="tile-label">Total Orders</div><div class="tile-val" id="analytics-total-orders">--</div><div class="tile-sub">All time</div></div>
+          <div class="tile"><div class="tile-label">Active Users</div><div class="tile-val" id="analytics-active-users">--</div><div class="tile-sub">Registered customers</div></div>
+          <div class="tile"><div class="tile-label">Providers</div><div class="tile-val" id="analytics-providers">--</div><div class="tile-sub">Verified</div></div>
+          <div class="tile gold-tile"><div class="tile-label">Revenue</div><div class="tile-val" id="analytics-revenue">--</div><div class="tile-sub" id="analytics-revenue-label">This month</div></div>
         </div>
-
-        <div style="display:grid; grid-template-columns:1fr 1fr; gap:1.5rem">
-          <div class="card-panel" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; max-width: none;">
-            <div style="margin-bottom: 1.5rem; font-size: 1.05rem; font-weight: 700; color: var(--g900);">Orders by Service</div>
+        <div style="display:grid;grid-template-columns:1fr 1fr;gap:1.4rem">
+          <div class="card-panel">
+            <div class="sec-head" style="margin-bottom:1.15rem"><h3>Orders by Service</h3></div>
             <!-- Chart bars: populated by app.js -->
             <div id="analytics-chart-bars">
               <div style="color:var(--muted);font-size:.855rem">Loading chart...</div>
             </div>
           </div>
-          <div class="card-panel" style="padding: 1.5rem; background: #fff; border: 1px solid var(--border); border-radius: 8px; max-width: none;">
-            <div style="margin-bottom: 1.5rem; font-size: 1.05rem; font-weight: 700; color: var(--g900);">Order Status Breakdown</div>
+          <div class="card-panel">
+            <div class="sec-head" style="margin-bottom:1.15rem"><h3>Order Status Breakdown</h3></div>
             <!-- Status bars: populated by app.js -->
             <div id="analytics-status-bars">
-              <div style="color:var(--muted);font-size:.855rem">Loading breakdown...</div>
+              <div style="color:var(--muted);font-size:.855rem">Loading...</div>
             </div>
           </div>
         </div>
       </div>
 
-  <!-- USERS -->
-        <div class="dsection" id="a-users">
-          <div class="sec-head">
-              <h3>User Management</h3>
-              <!-- Removed the + Add User button as requested -->
-          </div>
-          <div class="tbl-wrap">
-              <table>
-                  <thead>
-                      <tr>
-                          <th>User Details</th>
-                          <th>Email</th>
-                          <th>Role</th>
-                          <th>Plan</th>
-                          <th>Status</th>
-                          <th style="text-align:right">Actions</th>
-                      </tr>
-                  </thead>
-                  <!-- Users table: populated by app.js -->
-                  <tbody id="a-users-tbody">
-                      <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Loading users...</td></tr>
-                  </tbody>
-              </table>
-          </div>
-        </div>
+      <!-- USERS -->
+      <div class="dsection" id="a-users">
+        <div class="sec-head"><h3>User Management</h3><button class="btn-gold-sm" onclick="openAddUser()">+ Add User</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Plan</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
+        <!-- Users table: populated by app.js -->
+        <tbody id="a-users-tbody">
+<tr>
+  <td>Ali Raza</td>
+  <td>ali.raza@example.com</td>
+  <td>Admin</td>
+  <td>Premium Subscription</td>
+  <td><span class="badge b-green">Active</span></td>
+  <td class="td-actions"><button class="btn-outline-sm">Edit</button></td>
+</tr>
+<tr>
+  <td>Sara Khan</td>
+  <td>sara.khan@example.com</td>
+  <td>Supervisor</td>
+  <td>Complex Order</td>
+  <td><span class="badge b-amber">Suspended</span></td>
+  <td class="td-actions"><button class="btn-outline-sm">Edit</button></td>
+</tr>
+<tr>
+  <td>Usman Ahmed</td>
+  <td>usman.ahmed@example.com</td>
+  <td>Customer</td>
+  <td>Basic</td>
+  <td><span class="badge b-green">Active</span></td>
+  <td class="td-actions"><button class="btn-outline-sm">Edit</button></td>
+</tr>
+</tbody></table></div>
+      </div>
 
       <!-- ACTIVITY LOGS -->
       <div class="dsection" id="a-logs">
-        <div class="sec-head">
-          <h3>Activity Logs</h3>
-          <!-- Export CSV button has been removed from here -->
-        </div>
-        <div class="tbl-wrap">
-          <table>
-            <thead>
-              <tr>
-                <th>Timestamp</th>
-                <th>Event</th>
-                <th>Actor</th>
-                <th>Details</th>
-              </tr>
-            </thead>
-            <!-- Logs: populated by app.js -->
-            <tbody id="a-logs-tbody">
-              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Loading logs...</td></tr>
-            </tbody>
-          </table>
-        </div>
+        <div class="sec-head"><h3>Activity Logs</h3><button class="btn-outline-sm">Export CSV</button></div>
+        <div class="tbl-wrap"><table><thead><tr><th>Timestamp</th><th>Event</th><th>Actor</th><th>Details</th></tr></thead>
+        <!-- Logs: populated by app.js -->
+        <tbody id="a-logs-tbody">
+          <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Loading logs...</td></tr>
+        </tbody></table></div>
       </div>
 
       <!-- COMPLAINTS -->
@@ -581,27 +1176,9 @@
   <div class="dash-main">
     <div class="dash-topbar">
       <h2 id="s-title">Orders</h2>
-      <div class="tb-right">
-        
-        <!-- SUPERVISOR NOTIFICATIONS -->
-        <div class="notif-wrap">
-          <div class="tb-notif" onclick="toggleSupNotifs()">
-            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>
-          </div>
-          
-          <!-- DROPDOWN MENU -->
-          <div class="notif-dropdown" id="s-notif-dropdown">
-            <div class="notif-head">Notifications <span class="badge b-blue" id="s-notif-count">0</span></div>
-            <div class="notif-body" id="s-notif-list">
-               <div style="padding:1.5rem;text-align:center;color:var(--muted);font-size:.85rem">Loading...</div>
-            </div>
-          </div>
-        </div>
-
-        <!-- Supervisor avatar -->
-        <div class="tb-avatar" id="supervisor-avatar">--</div>
-        
-      </div>
+      <div class="tb-right"><div class="tb-notif"><svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg></div>
+      <!-- Supervisor avatar: filled by app.js -->
+      <div class="tb-avatar" id="supervisor-avatar">--</div></div>
     </div>
     <div class="dash-content">
 
@@ -613,17 +1190,7 @@
           <div class="tile"><div class="tile-label">In Progress</div><div class="tile-val" id="sup-inprogress">--</div><div class="tile-sub">Active now</div></div>
           <div class="tile"><div class="tile-label">Completed Today</div><div class="tile-val" id="sup-completed">--</div><div class="tile-sub">Since midnight</div></div>
         </div>
-        <div class="sec-head">
-          <h3>All Orders</h3>
-          <select id="s-order-filter" class="btn-outline-sm select-filter" onchange="applyOrderFilter()">
-            <option value="all">No Filter (All Orders)</option>
-            <option value="requested">Requested</option>
-            <option value="assigned">Assigned</option>
-            <option value="in_progress">In Progress</option>
-            <option value="completed">Completed</option>
-            <option value="cancelled">Cancelled</option>
-          </select>
-        </div>
+        <div class="sec-head"><h3>All Orders</h3><button class="btn-outline-sm">Filter</button></div>
         <div class="tbl-wrap"><table><thead><tr><th>Order ID</th><th>Customer</th><th>Service</th><th>City</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
         <!-- Orders table: populated by app.js -->
         <tbody id="s-orders-tbody">
@@ -685,7 +1252,34 @@
         <div class="sec-head"><h3>Provider Directory</h3><button class="btn-gold-sm" onclick="openAddProvider()">+ Add Provider</button></div>
         <!-- Provider cards: populated by app.js -->
         <div id="provider-directory">
-          <div style="color:var(--muted);font-size:.875rem;padding:1rem">Loading providers...</div>
+<div class="provider-card">
+  <div>
+    <div class="prov-name">Ahmed Electric Services</div>
+    <div class="prov-detail">Home Maintenance · Lahore</div>
+  </div>
+  <div class="td-actions">
+    <button class="btn-outline-sm">Edit</button>
+  </div>
+</div>
+<div class="provider-card">
+  <div>
+    <div class="prov-name">CarePlus Elders</div>
+    <div class="prov-detail">Elderly Care · Islamabad</div>
+  </div>
+  <div class="td-actions">
+    <button class="btn-outline-sm">Edit</button>
+  </div>
+</div>
+<div class="provider-card">
+  <div>
+    <div class="prov-name">QuickBill Pay</div>
+    <div class="prov-detail">Bill Payments · Karachi</div>
+  </div>
+  <div class="td-actions">
+    <button class="btn-outline-sm">Edit</button>
+  </div>
+</div>
+</div>
         </div>
       </div>
 
@@ -748,7 +1342,7 @@
 </div>
 
 
-<!-- Add User Modal: added for Admin dashboard + Add User button -->
+<!-- Add User Modal: preview-only modal for Admin dashboard + Add User button -->
 <div class="modal-bg" id="adduser-modal" onclick="if(event.target===this)closeAddUser()">
  <div class="modal">
  <button class="modal-close" onclick="closeAddUser()">✕</button>
@@ -823,7 +1417,7 @@ function openAddUser(){
  document.getElementById('adduser-modal')?.classList.add('open');
 }
 function closeAddUser(){document.getElementById('adduser-modal')?.classList.remove('open');}
-function saveAddUser(){alert('✅ User added. Connect this form to backend/app.js when ready.');closeAddUser();}
+function saveAddUser(){alert('✅ User added. This is preview-only dummy flow.');closeAddUser();}
 
 function openEditUser(btn){
  const row = btn ? btn.closest('tr') : null;
@@ -850,6 +1444,42 @@ document.addEventListener('click', function(e){
 }, true);
 </script>
 
-<script src="js/app.js"></script>
+
+
+
+<div class="preview-bar">
+ <span>Preview</span>
+ <button class="pb-btn cur" onclick="previewGo('pg-home',this)">Home</button>
+ <button class="pb-btn" onclick="previewGo('pg-auth',this)">Auth</button>
+ <button class="pb-btn" onclick="previewGo('pg-customer',this)">Customer</button>
+ <button class="pb-btn" onclick="previewGo('pg-admin',this)">Admin</button>
+ <button class="pb-btn" onclick="previewGo('pg-supervisor',this)">Supervisor</button>
+</div>
+
+
+<script>
+/* Preview-only helpers so the single-file preview works without js/app.js */
+function previewGo(id,btn){goPage(id);document.querySelectorAll('.pb-btn').forEach(b=>b.classList.remove('cur'));if(btn)btn.classList.add('cur');}
+function goPage(id){document.querySelectorAll('.page').forEach(p=>p.classList.remove('active'));document.getElementById(id)?.classList.add('active');window.scrollTo(0,0);}
+function scrollToSection(id){document.getElementById(id)?.scrollIntoView({behavior:'smooth'});}
+function authTab(tab,btn){document.querySelectorAll('.auth-panel').forEach(p=>p.classList.remove('active'));document.getElementById('ap-'+tab)?.classList.add('active');document.querySelectorAll('.auth-tab').forEach(b=>b.classList.remove('active'));if(btn)btn.classList.add('active');}
+function cShow(id,el){dashShow(id,el,'pg-customer','c-title');}
+function aShow(id,el){dashShow(id,el,'pg-admin','a-title');}
+function sShow(id,el){dashShow(id,el,'pg-supervisor','s-title');}
+function dashShow(id,el,pageId,titleId){document.querySelectorAll('#'+pageId+' .dsection').forEach(s=>s.classList.remove('active'));document.getElementById(id)?.classList.add('active');if(el){el.parentElement.querySelectorAll('.sb-link').forEach(l=>l.classList.remove('active'));el.classList.add('active');}const t=document.getElementById(titleId);const h=document.querySelector('#'+id+' .sec-head h3');if(t&&h)t.textContent=h.textContent;}
+function trackOrder(){document.getElementById('track-modal')?.classList.add('open');}
+function closeTrack(){document.getElementById('track-modal')?.classList.remove('open');}
+function openAddSvc(){document.getElementById('addsvc-modal')?.classList.add('open');}
+function closeAddSvc(){document.getElementById('addsvc-modal')?.classList.remove('open');}
+function doAddSvc(){alert('✅ Service added preview.');closeAddSvc();}
+function closeRate(){document.getElementById('rate-modal')?.classList.remove('open');}
+function setRating(){} function submitRate(){alert('Rating submitted preview.');closeRate();}
+function authLogin(){goPage('pg-customer');} function authSignup(){goPage('pg-customer');}
+function submitComplaint(){alert('Complaint submitted preview.');}
+function saveProfile(){alert('Profile saved preview.');}
+function doAssign(){alert('Assignment saved preview.');}
+function doStatus(){alert('Status updated preview.');}
+</script>
+
 </body>
 </html>
