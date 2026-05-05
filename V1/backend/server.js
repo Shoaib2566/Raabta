@@ -231,6 +231,36 @@ app.post('/api/orders', authenticateToken, authorizeRole(['customer', 'guest']),
         // Use authenticated user ID
         const customer_id = req.user.user_id;
 
+        // --- PLAN LIMIT ENFORCEMENT ---
+        if (req.user.role === 'customer') {
+            const { data: customerPlan } = await supabase
+                .from('customer_plans')
+                .select('status')
+                .eq('customer_id', customer_id)
+                .eq('status', 'active')
+                .maybeSingle();
+
+            // If they do NOT have an active premium plan (meaning they are Basic)
+            if (!customerPlan) { 
+                const startOfMonth = new Date();
+                startOfMonth.setDate(1); 
+                startOfMonth.setHours(0, 0, 0, 0);
+
+                // Count how many orders they've placed this month
+                const { count: ordersThisMonth } = await supabase
+                    .from('orders')
+                    .select('*', { count: 'exact', head: true })
+                    .eq('customer_id', customer_id)
+                    .gte('requested_at', startOfMonth.toISOString());
+
+                // Reject if they exceed 1 order
+                if (ordersThisMonth >= 1) {
+                    return res.status(403).json({ error: 'free limit reached upgrade plan to proceed further' });
+                }
+            }
+        }
+        // ------------------------------
+
         const { data: order, error } = await supabase.from('orders').insert([{
             customer_id,
             service_id,
@@ -280,6 +310,54 @@ app.get('/api/customer/complaints', authenticateToken, authorizeRole(['customer'
 
         if (error) throw error;
         res.json(complaints);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+// FR3.3.7 - Customer Plan Details & Usage
+app.get('/api/customer/plan', authenticateToken, authorizeRole(['customer']), async (req, res) => {
+    try {
+        const customerId = req.user.user_id;
+
+        // 1. Try to fetch an active subscription plan
+        const { data: customerPlan } = await supabase
+            .from('customer_plans')
+            .select(`
+                start_date, end_date, status,
+                service_plans (plan_name, price_estimate, description)
+            `)
+            .eq('customer_id', customerId)
+            .eq('status', 'active')
+            .maybeSingle();
+
+        // Default to 'Basic' if they don't have an active premium subscription
+        let planData = { 
+            name: 'Basic', 
+            price: 'Free first order, then $19/request', 
+            usage: 0, 
+            limit: 1 
+        };
+
+        if (customerPlan && customerPlan.service_plans) {
+            planData.name = customerPlan.service_plans.plan_name || 'Premium';
+            planData.price = `$${customerPlan.service_plans.price_estimate} / month`;
+            planData.limit = 10; // Premium limit for UI purposes
+        }
+
+        // 2. Calculate how many orders they've placed this month
+        const startOfMonth = new Date();
+        startOfMonth.setDate(1); 
+        startOfMonth.setHours(0, 0, 0, 0);
+
+        const { count: ordersThisMonth } = await supabase
+            .from('orders')
+            .select('*', { count: 'exact', head: true })
+            .eq('customer_id', customerId)
+            .gte('requested_at', startOfMonth.toISOString());
+
+        planData.usage = ordersThisMonth || 0;
+
+        res.json(planData);
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

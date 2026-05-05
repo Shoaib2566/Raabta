@@ -33,6 +33,35 @@ async function fetchWithAuth(endpoint, options = {}) {
 }
 
 // ==========================================
+// UI HELPERS (Dynamic Avatars)
+// ==========================================
+window.updateAvatars = function() {
+    const userStr = localStorage.getItem('raabta_user');
+    if (!userStr) return;
+    
+    try {
+        const user = JSON.parse(userStr);
+        // Fallback to 'name' or 'full_name' depending on the login/signup response
+        const fullName = user.name || user.full_name || 'U'; 
+        
+        // Split the name by spaces
+        const names = fullName.trim().split(' ');
+        
+        // Get first letter of first name, and first letter of last name
+        const initials = names.length > 1 
+            ? (names[0][0] + names[names.length - 1][0]).toUpperCase()
+            : fullName.substring(0, 2).toUpperCase(); // Fallback if only 1 name is provided
+
+        // Update all three dashboard avatars at once
+        ['user-avatar', 'admin-avatar', 'supervisor-avatar'].forEach(id => {
+            const el = document.getElementById(id);
+            if (el) el.textContent = initials;
+        });
+    } catch(e) { console.error("Could not set avatar:", e); }
+};
+
+
+// ==========================================
 // AUTHENTICATION LOGIC
 // ==========================================
 window.authSignup = async function() {
@@ -57,7 +86,7 @@ window.authSignup = async function() {
         if (response.ok) {
             localStorage.setItem('raabta_token', data.token);
             localStorage.setItem('raabta_user', JSON.stringify(data.user)); 
-            
+            updateAvatars();
             if(data.user.role === 'admin') { goPage('pg-admin'); aShow('a-analytics'); }
             else if(data.user.role === 'supervisor') { goPage('pg-supervisor'); sShow('s-orders'); }
             else { goPage('pg-customer'); cShow('c-dash'); }
@@ -86,7 +115,7 @@ window.authLogin = async function() {
         if (response.ok) {
             localStorage.setItem('raabta_token', data.token);
             localStorage.setItem('raabta_user', JSON.stringify(data.user)); 
-            
+            updateAvatars();
             if(data.user.role === 'admin') { goPage('pg-admin'); aShow('a-analytics'); }
             else if(data.user.role === 'supervisor') { goPage('pg-supervisor'); sShow('s-orders'); }
             else { goPage('pg-customer'); cShow('c-dash'); }
@@ -244,13 +273,50 @@ window.submitNewOrder = async function() {
         panel.querySelector('textarea').value = '';
         cShow('c-dash'); 
     } catch(e) {
-        alert("Error submitting order: " + e.message);
+        // --- NEW ERROR HANDLING ---
+        if (e.message.includes('free limit reached')) {
+            alert('free limit reached upgrade plan to proceed further');
+        } else {
+            alert("Error submitting order: " + e.message);
+        }
     }
 };
 
 // ==========================================
 // VIEW SWITCHERS & EVENTS
 // ==========================================
+
+window.loadCustomerPlan = async function() {
+    try {
+        const data = await fetchWithAuth('/customer/plan');
+
+        // 1. Update the little tile on the main Dashboard
+        if(byId('tile-plan-name')) byId('tile-plan-name').textContent = data.name;
+        if(byId('tile-plan-desc')) byId('tile-plan-desc').textContent = `${data.usage} orders this month`;
+
+        // 2. Update the dedicated "My Plan" page
+        if(byId('plan-name-display')) byId('plan-name-display').textContent = data.name + ' Plan';
+        if(byId('plan-price-display')) byId('plan-price-display').textContent = data.price;
+        if(byId('plan-usage')) byId('plan-usage').innerHTML = `<strong style="color:var(--gold2)">${data.usage} / ${data.limit}</strong>`;
+
+        // 3. Animate the progress bar safely
+        const bar = byId('plan-usage-bar');
+        if (bar) {
+            let percentage = (data.usage / data.limit) * 100;
+            if (percentage > 100) percentage = 100; // Cap at 100%
+            
+            // Turn the bar red if they are at or over their limit
+            if (percentage >= 100) bar.style.background = '#DC2626'; 
+            else bar.style.background = 'var(--gold)';
+            
+            bar.style.width = `${percentage}%`;
+        }
+    } catch (error) {
+        console.error('Plan Load Error:', error);
+        if(byId('tile-plan-name')) byId('tile-plan-name').textContent = 'Basic';
+        if(byId('plan-name-display')) byId('plan-name-display').textContent = 'Basic Plan';
+    }
+};
 function showSection(scope,id,link,titleId,titles){document.querySelectorAll(`#${scope} .dsection`).forEach(s=>s.classList.remove('active'));document.querySelectorAll(`#${scope} .sb-link`).forEach(a=>a.classList.remove('active'));byId(id)?.classList.add('active'); if(link)link.classList.add('active'); if(byId(titleId)&&titles[id])byId(titleId).textContent=titles[id];}
 
 window.cShow=function(id,link){
@@ -258,10 +324,14 @@ window.cShow=function(id,link){
     if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-customer .sb-link')[i]:null} 
     showSection('pg-customer',id,link,'c-title',{'c-dash':'Dashboard','c-neworder':'New Order','c-services':'Services','c-history':'Order History','c-plans':'My Plan','c-complaints':'Complaints','c-profile':'Profile'});
     
-    // 🔥 THIS TRIGGERS THE DATA FETCH 🔥
-    if (id === 'c-dash') loadCustomerDashboard();
+    // 🔥 TRIGGER DATA FETCHES 🔥
+    if (id === 'c-dash') {
+        loadCustomerDashboard();
+        loadCustomerPlan(); // Ensure the dashboard tile updates too!
+    }
     if (id === 'c-history') loadCustomerOrders();
-    if (id === 'c-complaints') loadCustomerComplaints(); // <-- Add this line
+    if (id === 'c-complaints') loadCustomerComplaints();
+    if (id === 'c-plans') loadCustomerPlan(); // Load data when clicking "My Plan"
 };
 
 window.aShow=function(id,link){
@@ -755,6 +825,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const userString = localStorage.getItem('raabta_user');
     
     if (token && userString) {
+        updateAvatars();
         const user = JSON.parse(userString);
         if(user.role === 'admin') {
             goPage('pg-admin'); aShow('a-analytics');
