@@ -538,6 +538,52 @@ app.get('/api/admin/users', authenticateToken, authorizeRole(['admin']), async (
         res.status(500).json({ error: err.message });
     }
 });
+// FR3.2.1 - Get All Services (Admin View with Order Counts)
+app.get('/api/admin/services', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        // Fetch all services
+        const { data: services, error: svcError } = await supabase.from('services').select('*');
+        if (svcError) throw svcError;
+
+        // Fetch all orders to count them
+        const { data: orders, error: ordError } = await supabase.from('orders').select('service_id');
+        if (ordError) throw ordError;
+
+        // Calculate order counts per service
+        const orderCounts = {};
+        orders.forEach(o => { 
+            orderCounts[o.service_id] = (orderCounts[o.service_id] || 0) + 1; 
+        });
+
+        // Merge the counts into the services array and sort by most popular
+        const formattedServices = services.map(s => ({ 
+            ...s, 
+            order_count: orderCounts[s.service_id] || 0 
+        }));
+        formattedServices.sort((a, b) => b.order_count - a.order_count);
+
+        res.json(formattedServices);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// FR3.2.4 - Edit Service Name
+app.patch('/api/admin/services/:id/name', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { service_name } = req.body;
+        
+        const { error } = await supabase.from('services')
+            .update({ service_name })
+            .eq('service_id', id);
+            
+        if (error) throw error;
+        res.json({ message: 'Service renamed successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // FR3.2.2 - Add New Service
 app.post('/api/admin/services', authenticateToken, authorizeRole(['admin']), async (req, res) => {
@@ -571,7 +617,126 @@ app.patch('/api/admin/services/:id/toggle', authenticateToken, authorizeRole(['a
         res.status(500).json({ error: err.message });
     }
 });
+// FR3.5.3 - Admin Activity Logs
+app.get('/api/admin/logs', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        // 1. Fetch recent data from multiple tables safely
+        const { data: orders } = await supabase.from('orders').select('order_id, requested_at, customer_id, service_id').order('requested_at', { ascending: false }).limit(15);
+        const { data: history } = await supabase.from('order_status_history').select('order_id, updated_at, new_status, updated_by_supervisor_id').order('updated_at', { ascending: false }).limit(15);
+        const { data: assignments } = await supabase.from('order_assignments').select('order_id, assigned_at, supervisor_id, provider_id').order('assigned_at', { ascending: false }).limit(15);
 
+        // 2. Fetch related names manually to prevent strict Foreign Key crashes
+        const userIds = new Set([
+            ...(orders?.map(o => o.customer_id) || []),
+            ...(history?.map(h => h.updated_by_supervisor_id) || []),
+            ...(assignments?.map(a => a.supervisor_id) || [])
+        ]);
+        const serviceIds = new Set(orders?.map(o => o.service_id) || []);
+        const providerIds = new Set(assignments?.map(a => a.provider_id) || []);
+
+        const { data: users } = await supabase.from('app_users').select('user_id, full_name, role').in('user_id', Array.from(userIds));
+        const { data: services } = await supabase.from('services').select('service_id, service_name').in('service_id', Array.from(serviceIds));
+        const { data: providers } = await supabase.from('service_providers').select('provider_id, provider_name').in('provider_id', Array.from(providerIds));
+
+        // 3. Format into a unified log array
+        let logs = [];
+
+        (orders || []).forEach(o => {
+            const user = users?.find(u => u.user_id === o.customer_id);
+            const svc = services?.find(s => s.service_id === o.service_id);
+            logs.push({
+                timestamp: o.requested_at,
+                event: 'Order Created',
+                actor: user ? user.full_name : 'Customer',
+                details: `#ORD-${o.order_id} — ${svc ? svc.service_name : 'Service'}`
+            });
+        });
+
+        (history || []).forEach(h => {
+            const user = users?.find(u => u.user_id === h.updated_by_supervisor_id);
+            const statusStr = h.new_status ? h.new_status.replace('_', ' ').replace(/\b\w/g, l => l.toUpperCase()) : 'Updated';
+            let eventType = h.new_status === 'completed' ? 'Order Completed' : 'Status Updated';
+            
+            logs.push({
+                timestamp: h.updated_at,
+                event: eventType,
+                actor: user ? `${user.full_name} (${user.role.charAt(0).toUpperCase() + user.role.slice(1)})` : 'System',
+                details: h.new_status === 'completed' ? `#ORD-${h.order_id} marked Completed` : `#ORD-${h.order_id} → ${statusStr}`
+            });
+        });
+
+        (assignments || []).forEach(a => {
+            const user = users?.find(u => u.user_id === a.supervisor_id);
+            const prov = providers?.find(p => p.provider_id === a.provider_id);
+            logs.push({
+                timestamp: a.assigned_at,
+                event: 'Order Assigned',
+                actor: user ? `${user.full_name} (${user.role.charAt(0).toUpperCase() + user.role.slice(1)})` : 'Supervisor',
+                details: `#ORD-${a.order_id} → ${prov ? prov.provider_name : 'Provider'}`
+            });
+        });
+
+        // 4. Sort everything by timestamp descending (newest first)
+        logs.sort((a, b) => new Date(b.timestamp) - new Date(a.timestamp));
+
+        res.json(logs.slice(0, 40)); // Send the top 40 most recent events
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// FR3.8 - Admin View Complaints
+app.get('/api/admin/complaints', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        // 1. Fetch complaints
+        const { data: complaints, error } = await supabase.from('service_cases')
+            .select('*')
+            .eq('case_type', 'complaint')
+            .order('created_at', { ascending: false });
+
+        if (error) throw error;
+
+        // 2. Safely fetch customer names manually
+        if (complaints && complaints.length > 0) {
+            const customerIds = [...new Set(complaints.map(c => c.customer_id).filter(Boolean))];
+            
+            if (customerIds.length > 0) {
+                const { data: users } = await supabase.from('app_users')
+                    .select('user_id, full_name')
+                    .in('user_id', customerIds);
+                
+                complaints.forEach(c => {
+                    const user = users?.find(u => u.user_id === c.customer_id);
+                    c.customer_name = user ? user.full_name : 'Unknown Customer';
+                });
+            }
+        }
+
+        res.json(complaints || []);
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// FR3.8 - Admin Resolve Complaint
+app.patch('/api/admin/complaints/:id/resolve', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const { id } = req.params;
+        
+        const { error } = await supabase.from('service_cases')
+            .update({ 
+                status: 'resolved', 
+                handled_by_admin_id: req.user.user_id,
+                resolved_at: new Date().toISOString()
+            })
+            .eq('case_id', id);
+
+        if (error) throw error;
+        res.json({ message: 'Complaint resolved successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;

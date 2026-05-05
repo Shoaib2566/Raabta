@@ -497,24 +497,54 @@
         </div>
       </div>
 
-      <!-- USERS -->
-      <div class="dsection" id="a-users">
-        <div class="sec-head"><h3>User Management</h3><button class="btn-gold-sm">+ Add User</button></div>
-        <div class="tbl-wrap"><table><thead><tr><th>Name</th><th>Email</th><th>Role</th><th>Plan</th><th>Status</th><th style="text-align:right">Actions</th></tr></thead>
-        <!-- Users table: populated by app.js -->
-        <tbody id="a-users-tbody">
-          <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Loading users...</td></tr>
-        </tbody></table></div>
-      </div>
+  <!-- USERS -->
+        <div class="dsection" id="a-users">
+          <div class="sec-head">
+              <h3>User Management</h3>
+              <!-- Removed the + Add User button as requested -->
+          </div>
+          <div class="tbl-wrap">
+              <table>
+                  <thead>
+                      <tr>
+                          <th>User Details</th>
+                          <th>Email</th>
+                          <th>Role</th>
+                          <th>Plan</th>
+                          <th>Status</th>
+                          <th style="text-align:right">Actions</th>
+                      </tr>
+                  </thead>
+                  <!-- Users table: populated by app.js -->
+                  <tbody id="a-users-tbody">
+                      <tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Loading users...</td></tr>
+                  </tbody>
+              </table>
+          </div>
+        </div>
 
       <!-- ACTIVITY LOGS -->
       <div class="dsection" id="a-logs">
-        <div class="sec-head"><h3>Activity Logs</h3><button class="btn-outline-sm">Export CSV</button></div>
-        <div class="tbl-wrap"><table><thead><tr><th>Timestamp</th><th>Event</th><th>Actor</th><th>Details</th></tr></thead>
-        <!-- Logs: populated by app.js -->
-        <tbody id="a-logs-tbody">
-          <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Loading logs...</td></tr>
-        </tbody></table></div>
+        <div class="sec-head">
+          <h3>Activity Logs</h3>
+          <!-- Export CSV button has been removed from here -->
+        </div>
+        <div class="tbl-wrap">
+          <table>
+            <thead>
+              <tr>
+                <th>Timestamp</th>
+                <th>Event</th>
+                <th>Actor</th>
+                <th>Details</th>
+              </tr>
+            </thead>
+            <!-- Logs: populated by app.js -->
+            <tbody id="a-logs-tbody">
+              <tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Loading logs...</td></tr>
+            </tbody>
+          </table>
+        </div>
       </div>
 
       <!-- COMPLAINTS -->

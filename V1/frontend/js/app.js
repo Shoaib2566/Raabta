@@ -271,7 +271,12 @@ window.aShow=function(id,link){
     
     // Trigger data fetch operations
     if (id === 'a-analytics') loadAdminAnalytics();
-};window.sShow=function(id,link){
+    if (id === 'a-users') loadAdminUsers();
+    if (id === 'a-logs') loadAdminLogs();
+    if (id === 'a-complaints') loadAdminComplaints();
+    if (id === 'a-services') loadAdminServices();
+};
+window.sShow=function(id,link){
     const ids=['s-orders','s-assign','s-status','s-providers']; 
     if(!link){const i=ids.indexOf(id); link=i>=0?document.querySelectorAll('#pg-supervisor .sb-link')[i]:null} 
     showSection('pg-supervisor',id,link,'s-title',{'s-orders':'Orders','s-assign':'Assign Order','s-status':'Update Status','s-providers':'Provider Directory'});
@@ -385,27 +390,49 @@ window.loadCustomerComplaints = async function() {
 
 // Admin/Supervisor specific Modal triggers
 window.openAddSvc=()=>byId('addsvc-modal')?.classList.add('open'); window.closeAddSvc=()=>byId('addsvc-modal')?.classList.remove('open');
+
+window.sGoAssign=function(id,svc){if(byId('s-assign-info'))byId('s-assign-info').textContent=`${id} — ${svc}`; sShow('s-assign');};
+window.sGoStatus=function(id){if(byId('s-status-info'))byId('s-status-info').textContent=id; sShow('s-status');};
 window.doAddSvc = async function() {
     const name = (byId('new-svc')?.value || '').trim();
     if (!name) { alert('Enter a service name.'); return; }
     try {
-        const data = await fetchWithAuth('/admin/services', {
+        await fetchWithAuth('/admin/services', {
             method: 'POST',
             body: JSON.stringify({ service_name: name, category: 'General', description: '', base_price_estimate: 0 })
         });
-        const tr = document.createElement('tr');
-        tr.innerHTML = `<td><strong>${name}</strong></td><td>General</td><td>0</td><td><span class="badge b-green">Active</span></td><td><div class="td-actions"><button class="btn-outline-sm" onclick="editSvc(this)">Edit</button><button class="btn-danger-sm" onclick="toggleSvc(this)">Disable</button></div></td>`;
-        byId('a-svc-tbody')?.appendChild(tr);
         byId('new-svc').value = '';
         closeAddSvc();
+        loadAdminServices(); // Automatically refresh the table
     } catch(e) { alert('Error adding service: ' + e.message); }
 };
 
-window.editSvc=function(btn){const s=btn.closest('tr')?.querySelector('strong'); if(!s)return; const n=prompt('Edit service name:',s.textContent); if(n)s.textContent=n;};
-window.toggleSvc=function(btn){const b=btn.closest('tr')?.querySelector('.badge'); if(!b)return; const on=b.classList.contains('b-green'); b.className='badge '+(on?'b-amber':'b-green'); b.textContent=on?'Inactive':'Active'; btn.textContent=on?'Enable':'Disable'; btn.className=on?'btn-g':'btn-danger-sm';};
-window.sGoAssign=function(id,svc){if(byId('s-assign-info'))byId('s-assign-info').textContent=`${id} — ${svc}`; sShow('s-assign');};
-window.sGoStatus=function(id){if(byId('s-status-info'))byId('s-status-info').textContent=id; sShow('s-status');};
+window.editSvc = async function(id, currentName) {
+    const newName = prompt('Edit service name:', currentName);
+    if (!newName || newName === currentName) return;
+    try {
+        await fetchWithAuth(`/admin/services/${id}/name`, {
+            method: 'PATCH',
+            body: JSON.stringify({ service_name: newName })
+        });
+        loadAdminServices(); // Refresh table
+    } catch(e) {
+        alert('Error updating service: ' + e.message);
+    }
+};
 
+window.toggleAdminSvc = async function(id, enable) {
+    if(!confirm(`Are you sure you want to ${enable ? 'enable' : 'disable'} this service?`)) return;
+    try {
+        await fetchWithAuth(`/admin/services/${id}/toggle`, {
+            method: 'PATCH',
+            body: JSON.stringify({ is_enabled: enable })
+        });
+        loadAdminServices(); // Refresh table
+    } catch (e) {
+        alert('Error toggling service: ' + e.message);
+    }
+};
 window.doAssign = async function() {
     const orderText = byId('s-assign-info')?.textContent || '';
     const order_id = orderText.match(/\d+/)?.[0];
@@ -881,4 +908,205 @@ window.loadAdminAnalytics = async function() {
     }
 };
 
-})(); // <-- Notice how the fence closes down here now!
+window.loadAdminUsers = async function() {
+    try {
+        const tbody = byId('a-users-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Loading users...</td></tr>';
+
+        const users = await fetchWithAuth('/admin/users');
+        tbody.innerHTML = '';
+
+        if (!users || users.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">No users found.</td></tr>';
+            return;
+        }
+
+        users.forEach(u => {
+            // Determine badge colors based on role and status
+            const roleClass = u.role === 'admin' ? 'b-red' : (u.role === 'supervisor' ? 'b-blue' : 'b-gray');
+            const roleDisplay = u.role.charAt(0).toUpperCase() + u.role.slice(1);
+            
+            const statusClass = u.account_status === 'active' ? 'b-green' : 'b-amber';
+            const statusDisplay = u.account_status.charAt(0).toUpperCase() + u.account_status.slice(1);
+            
+            const dateStr = new Date(u.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+
+            tbody.innerHTML += `
+                <tr>
+                    <td>
+                        <strong>${u.full_name}</strong><br>
+                        <span style="font-size:0.75rem;color:var(--muted)">Joined ${dateStr}</span>
+                    </td>
+                    <td>${u.email}</td>
+                    <td><span class="badge ${roleClass}">${roleDisplay}</span></td>
+                    <td><span style="color:var(--muted)">Standard</span></td>
+                    <td><span class="badge ${statusClass}">${statusDisplay}</span></td>
+                    <td style="text-align:right">
+                        <button class="btn-outline-sm" onclick="alert('Manage user modal coming soon!')">Manage</button>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (error) {
+        console.error("Users Load Error:", error);
+        if (byId('a-users-tbody')) {
+            byId('a-users-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Failed to load data. Is the backend running?</td></tr>';
+        }
+    }
+};
+
+window.loadAdminLogs = async function() {
+    try {
+        const tbody = byId('a-logs-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Loading logs...</td></tr>';
+
+        const logs = await fetchWithAuth('/admin/logs');
+        tbody.innerHTML = '';
+
+        if (!logs || logs.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">No recent activity.</td></tr>';
+            return;
+        }
+
+        logs.forEach(log => {
+            // Format timestamp to look like "2026-05-02 14:32"
+            const d = new Date(log.timestamp);
+            const dateStr = d.getFullYear() + '-' +
+                            String(d.getMonth() + 1).padStart(2, '0') + '-' +
+                            String(d.getDate()).padStart(2, '0') + ' ' +
+                            String(d.getHours()).padStart(2, '0') + ':' +
+                            String(d.getMinutes()).padStart(2, '0');
+
+            // Map the event to the correct badge color based on your screenshot
+            let badgeHtml = '';
+            if (log.event === 'Order Created') badgeHtml = '<span class="badge b-blue">Order Created</span>';
+            else if (log.event === 'Order Assigned') badgeHtml = '<span class="badge" style="background:#F3E8FF; color:#4F46E5">Order Assigned</span>';
+            else if (log.event === 'Status Updated') badgeHtml = '<span class="badge b-amber">Status Updated</span>';
+            else if (log.event === 'Order Completed') badgeHtml = '<span class="badge b-green">Order Completed</span>';
+            else badgeHtml = `<span class="badge b-gray">${log.event}</span>`;
+
+            tbody.innerHTML += `
+                <tr>
+                    <td style="color:var(--g600)">${dateStr}</td>
+                    <td>${badgeHtml}</td>
+                    <td>${log.actor}</td>
+                    <td style="color:var(--g800)">${log.details}</td>
+                </tr>
+            `;
+        });
+    } catch (error) {
+        console.error("Logs Load Error:", error);
+        if (byId('a-logs-tbody')) {
+            byId('a-logs-tbody').innerHTML = '<tr><td colspan="4" style="text-align:center;color:var(--muted);padding:1.5rem">Failed to load logs. Is the backend running?</td></tr>';
+        }
+    }
+};
+
+window.loadAdminComplaints = async function() {
+    try {
+        const tbody = byId('a-complaints-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Loading complaints...</td></tr>';
+
+        const complaints = await fetchWithAuth('/admin/complaints');
+        tbody.innerHTML = '';
+
+        if (!complaints || complaints.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">No complaints found.</td></tr>';
+            return;
+        }
+
+        complaints.forEach(c => {
+            const isResolved = c.status === 'resolved' || c.status === 'closed';
+            
+            // Badge styling matching the screenshot
+            const statusClass = isResolved ? 'b-green' : 'b-amber';
+            const statusDisplay = c.status.charAt(0).toUpperCase() + c.status.slice(1);
+            
+            // Action column mapping
+            const actionHtml = isResolved 
+                ? `<span style="font-size:.85rem;color:var(--muted)">Closed</span>`
+                : `<button class="btn-gold-sm" onclick="resolveAdminComplaint(${c.case_id})">Resolve</button>`;
+
+            const orderRef = c.order_id ? `#ORD-${c.order_id}` : 'N/A';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>CMP-${String(c.case_id).padStart(3, '0')}</strong></td>
+                    <td>${c.customer_name || 'Unknown'}</td>
+                    <td>${c.category || 'General'}</td>
+                    <td>${orderRef}</td>
+                    <td><span class="badge ${statusClass}">${statusDisplay}</span></td>
+                    <td style="text-align:right">${actionHtml}</td>
+                </tr>
+            `;
+        });
+    } catch (error) {
+        console.error("Admin Complaints Load Error:", error);
+        if (byId('a-complaints-tbody')) {
+            byId('a-complaints-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Failed to load complaints. Is the backend running?</td></tr>';
+        }
+    }
+};
+
+window.resolveAdminComplaint = async function(id) {
+    if (!confirm('Mark this complaint as resolved?')) return;
+    try {
+        await fetchWithAuth(`/admin/complaints/${id}/resolve`, { method: 'PATCH' });
+        loadAdminComplaints(); // Refresh the table
+    } catch (e) {
+        alert('Error resolving complaint: ' + e.message);
+    }
+};
+
+window.loadAdminServices = async function() {
+    try {
+        const tbody = byId('a-svc-tbody');
+        if (!tbody) return;
+        tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">Loading services...</td></tr>';
+
+        const services = await fetchWithAuth('/admin/services');
+        tbody.innerHTML = '';
+
+        if (!services || services.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">No services found.</td></tr>';
+            return;
+        }
+
+        services.forEach(svc => {
+            const isActive = svc.is_enabled;
+            const statusClass = isActive ? 'b-green' : 'b-amber';
+            const statusText = isActive ? 'Active' : 'Inactive';
+            // Styling buttons to match your screenshot
+            const btnStyle = isActive 
+                ? 'color:#DC2626; border-color:#DC2626; background:transparent;' 
+                : 'background:var(--g900); color:white; border:none;';
+            const btnText = isActive ? 'Disable' : 'Enable';
+
+            tbody.innerHTML += `
+                <tr>
+                    <td><strong>${svc.service_name}</strong></td>
+                    <td>${svc.category || 'General'}</td>
+                    <td>${svc.order_count || 0}</td>
+                    <td><span class="badge ${statusClass}">${statusText}</span></td>
+                    <td style="text-align:right">
+                        <div style="display:flex; gap:0.5rem; justify-content:flex-end">
+                            <button class="btn-outline-sm" onclick="editSvc(${svc.service_id}, '${svc.service_name}')">Edit</button>
+                            <button class="btn-outline-sm" style="${btnStyle}" onclick="toggleAdminSvc(${svc.service_id}, ${!isActive})">${btnText}</button>
+                        </div>
+                    </td>
+                </tr>
+            `;
+        });
+    } catch (error) {
+        console.error("Admin Services Load Error:", error);
+        if (byId('a-svc-tbody')) {
+            byId('a-svc-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">Failed to load services. Is the backend running?</td></tr>';
+        }
+    }
+};
+
+
+})(); 
