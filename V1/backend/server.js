@@ -13,6 +13,14 @@ app.use((req, res, next) => {
     next();
 });
 
+// Health check endpoint for Docker, CI/CD, and AWS EC2
+app.get('/health', (req, res) => {
+    res.status(200).json({
+        status: 'ok',
+        message: 'Raabta Backend is running'
+    });
+});
+
 // --- Database Configuration ---
 // Ensure you have SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY in your .env file
 const supabaseUrl = process.env.SUPABASE_URL || 'https://your-project.supabase.co';
