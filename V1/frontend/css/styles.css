@@ -642,3 +642,54 @@ body{padding-bottom:0!important}
     background-color: var(--white);
     color: var(--g900);
 }
+
+/* =========================================================
+   NOTIFICATIONS DROPDOWN
+   ========================================================= */
+.notif-wrap { position: relative; }
+.notif-dropdown {
+    display: none;
+    position: absolute;
+    top: calc(100% + 12px);
+    right: 0;
+    width: 340px;
+    background: var(--white);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.12);
+    z-index: 1000;
+    overflow: hidden;
+}
+.notif-dropdown.show { display: block; animation: fadeUp 0.2s ease; }
+.notif-head {
+    padding: 1rem 1.25rem;
+    background: var(--gold4);
+    border-bottom: 1px solid var(--border);
+    font-weight: 700;
+    color: var(--g800);
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+}
+.notif-body {
+    max-height: 350px;
+    overflow-y: auto;
+}
+.notif-item {
+    padding: 1.1rem 1.25rem;
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    gap: 0.85rem;
+    transition: background 0.2s;
+}
+.notif-item:hover { background: #fafafa; }
+.notif-item:last-child { border-bottom: none; }
+.notif-icon {
+    width: 34px; height: 34px;
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    flex-shrink: 0;
+    font-size: 0.9rem;
+}
+.notif-text { font-size: 0.85rem; color: var(--text); line-height: 1.4; margin-top: 0.2rem; }
+.notif-time { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; }

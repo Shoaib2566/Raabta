@@ -533,6 +533,58 @@ app.patch('/api/supervisor/providers/:id', authenticateToken, authorizeRole(['su
     }
 });
 
+// FR3.4 - Supervisor Notifications
+app.get('/api/supervisor/notifications', authenticateToken, authorizeRole(['supervisor', 'admin']), async (req, res) => {
+    try {
+        const supervisor_id = req.user.user_id;
+        let notifications = [];
+
+        // 1. Find Unassigned Orders (Status: Requested)
+        const { data: requestedOrders } = await supabase
+            .from('orders')
+            .select('order_id, requested_at, services(service_name)')
+            .eq('status', 'requested')
+            .order('requested_at', { ascending: false })
+            .limit(5);
+
+        (requestedOrders || []).forEach(o => {
+            notifications.push({
+                title: 'New Order Request',
+                message: `Order #ORD-${o.order_id} for ${o.services?.service_name || 'a service'} is awaiting assignment.`,
+                time: o.requested_at,
+                iconClass: 'b-blue',
+                icon: '📦'
+            });
+        });
+
+        // 2. Find Recent Provider Responses
+        const { data: assignments } = await supabase
+            .from('order_assignments')
+            .select('order_id, assigned_at, provider_response, service_providers(provider_name)')
+            .eq('supervisor_id', supervisor_id)
+            .not('provider_response', 'is', null)
+            .order('assigned_at', { ascending: false })
+            .limit(5);
+
+        (assignments || []).forEach(a => {
+            const isAccepted = a.provider_response === 'accepted';
+            notifications.push({
+                title: `Provider ${isAccepted ? 'Accepted' : 'Declined'}`,
+                message: `${a.service_providers?.provider_name || 'A provider'} ${a.provider_response} order #ORD-${a.order_id}.`,
+                time: a.assigned_at,
+                iconClass: isAccepted ? 'b-green' : 'b-red',
+                icon: isAccepted ? '✓' : '✕'
+            });
+        });
+
+        // Sort all notifications by time descending (newest first)
+        notifications.sort((a, b) => new Date(b.time) - new Date(a.time));
+
+        res.json(notifications.slice(0, 8)); // Return top 8 most recent
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
 // ==========================================
 // 5. ADMIN DASHBOARD (Protected)
 // ==========================================

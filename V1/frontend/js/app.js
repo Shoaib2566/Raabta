@@ -553,9 +553,7 @@ window.doStatus = async function() {
         alert('Error updating status: ' + e.message); 
     }
 };
-// ==========================================
-// SUPERVISOR DASHBOARD FETCHERS
-// ==========================================
+
 // ==========================================
 // SUPERVISOR DASHBOARD FETCHERS
 // ==========================================
@@ -1206,6 +1204,70 @@ window.loadAdminServices = async function() {
         console.error("Admin Services Load Error:", error);
         if (byId('a-svc-tbody')) {
             byId('a-svc-tbody').innerHTML = '<tr><td colspan="5" style="text-align:center;color:var(--muted);padding:1.5rem">Failed to load services. Is the backend running?</td></tr>';
+        }
+    }
+};
+
+// ==========================================
+// SUPERVISOR NOTIFICATIONS
+// ==========================================
+window.toggleSupNotifs = function() {
+    const drop = document.getElementById('s-notif-dropdown');
+    if (!drop) return;
+    
+    drop.classList.toggle('show');
+    
+    if (drop.classList.contains('show')) {
+        loadSupervisorNotifications();
+    }
+};
+
+// Close dropdown if clicking anywhere else
+document.addEventListener('click', e => {
+    if (!e.target.closest('.notif-wrap')) {
+        const drop = document.getElementById('s-notif-dropdown');
+        if (drop) drop.classList.remove('show');
+    }
+});
+
+window.loadSupervisorNotifications = async function() {
+    const list = document.getElementById('s-notif-list');
+    const badge = document.getElementById('s-notif-count');
+    if (!list) return;
+
+    try {
+        const notifs = await fetchWithAuth('/supervisor/notifications');
+        
+        if (badge) badge.textContent = notifs.length > 0 ? `${notifs.length} New` : '0';
+
+        list.innerHTML = '';
+        
+        // Handle empty state
+        if (!notifs || notifs.length === 0) {
+            list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--muted);font-size:.85rem">No new notifications.</div>';
+            return;
+        }
+
+        notifs.forEach(n => {
+            const timeObj = new Date(n.time);
+            const timeStr = isNaN(timeObj) ? 'Recently' : timeObj.toLocaleTimeString([], {hour: '2-digit', minute:'2-digit'});
+            
+            list.innerHTML += `
+                <div class="notif-item">
+                    <div class="notif-icon ${n.iconClass}">${n.icon}</div>
+                    <div>
+                        <div style="font-size:0.8rem;font-weight:700;color:var(--g900)">${n.title}</div>
+                        <div class="notif-text">${n.message}</div>
+                        <div class="notif-time">${timeStr}</div>
+                    </div>
+                </div>
+            `;
+        });
+    } catch (e) {
+        console.error("Notifications Error:", e);
+        // Fallback safely if there is a network error
+        if (list) {
+            list.innerHTML = '<div style="padding:1.5rem;text-align:center;color:var(--muted);font-size:.85rem">No new notifications.</div>';
         }
     }
 };
