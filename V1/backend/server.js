@@ -552,28 +552,26 @@ app.get('/api/supervisor/notifications', authenticateToken, authorizeRole(['supe
                 title: 'New Order Request',
                 message: `Order #ORD-${o.order_id} for ${o.services?.service_name || 'a service'} is awaiting assignment.`,
                 time: o.requested_at,
-                iconClass: 'b-blue',
+                iconClass: 'b-amber',
                 icon: '📦'
             });
         });
 
-        // 2. Find Recent Provider Responses
-        const { data: assignments } = await supabase
-            .from('order_assignments')
-            .select('order_id, assigned_at, provider_response, service_providers(provider_name)')
-            .eq('supervisor_id', supervisor_id)
-            .not('provider_response', 'is', null)
-            .order('assigned_at', { ascending: false })
+        // 2. Find Newly Assigned Providers (Added by Admin to this Supervisor)
+        const { data: newProviders } = await supabase
+            .from('service_providers')
+            .select('provider_id, provider_name, created_at, service_area')
+            .eq('primary_supervisor_id', supervisor_id)
+            .order('created_at', { ascending: false })
             .limit(5);
 
-        (assignments || []).forEach(a => {
-            const isAccepted = a.provider_response === 'accepted';
+        (newProviders || []).forEach(p => {
             notifications.push({
-                title: `Provider ${isAccepted ? 'Accepted' : 'Declined'}`,
-                message: `${a.service_providers?.provider_name || 'A provider'} ${a.provider_response} order #ORD-${a.order_id}.`,
-                time: a.assigned_at,
-                iconClass: isAccepted ? 'b-green' : 'b-red',
-                icon: isAccepted ? '✓' : '✕'
+                title: 'New Provider Assigned',
+                message: `Admin added ${p.provider_name} (${p.service_area || 'General'}) to your directory.`,
+                time: p.created_at,
+                iconClass: 'b-green',
+                icon: '👤'
             });
         });
 
