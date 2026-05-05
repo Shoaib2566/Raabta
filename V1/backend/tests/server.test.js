@@ -1,8 +1,7 @@
 const request = require("supertest");
-const app =  require("../server");
 
 let mockScenario = "default";
-let mockSingleCounts = {};
+let appUsersSingleCallCount = 0;
 
 const mockFrom = jest.fn((table) => {
     const chain = {
@@ -20,10 +19,10 @@ const mockFrom = jest.fn((table) => {
         }),
 
         single: jest.fn(() => {
-            mockSingleCounts[table] = (mockSingleCounts[table] || 0) + 1;
-
             if (mockScenario === "signup-201" && table === "app_users") {
-                if (mockSingleCounts[table] === 1) {
+                appUsersSingleCallCount += 1;
+
+                if (appUsersSingleCallCount === 1) {
                     return Promise.resolve({
                         data: null,
                         error: null
@@ -54,20 +53,12 @@ const mockFrom = jest.fn((table) => {
         }),
 
         insert: jest.fn(() => chain),
-
-        maybeSingle: jest.fn(() => {
-            return Promise.resolve({
-                data: null,
-                error: null
-            });
-        }),
-
+        update: jest.fn(() => chain),
         order: jest.fn(() => chain),
         limit: jest.fn(() => chain),
         in: jest.fn(() => chain),
         gte: jest.fn(() => chain),
-        update: jest.fn(() => chain),
-        patch: jest.fn(() => chain)
+        maybeSingle: jest.fn(() => Promise.resolve({ data: null, error: null }))
     };
 
     return chain;
@@ -81,10 +72,10 @@ jest.mock("@supabase/supabase-js", () => ({
 
 const app = require("../server");
 
-describe("Raabta Backend API Status Code Tests", () => {
+describe("Raabta Backend API Tests", () => {
     beforeEach(() => {
         mockScenario = "default";
-        mockSingleCounts = {};
+        appUsersSingleCallCount = 0;
         mockFrom.mockClear();
     });
 
@@ -114,7 +105,7 @@ describe("Raabta Backend API Status Code Tests", () => {
         expect(response.body.user.role).toBe("customer");
     });
 
-    test("400: POST /api/auth/signup should fail when required fields are missing", async () => {
+    test("400: POST /api/auth/signup should return 400 when required fields are missing", async () => {
         const response = await request(app)
             .post("/api/auth/signup")
             .send({
@@ -123,6 +114,13 @@ describe("Raabta Backend API Status Code Tests", () => {
 
         expect(response.statusCode).toBe(400);
         expect(response.body.error).toBe("All fields are required");
+    });
+
+    test("401: GET /api/customer/dashboard should fail without token", async () => {
+        const response = await request(app).get("/api/customer/dashboard");
+
+        expect(response.statusCode).toBe(401);
+        expect(response.body.error).toBe("Access token required");
     });
 
     test("404: GET /api/orders/track/:orderId should return order not found", async () => {
