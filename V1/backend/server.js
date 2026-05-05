@@ -876,7 +876,12 @@ app.patch('/api/admin/complaints/:id/resolve', authenticateToken, authorizeRole(
 
 // --- Server Startup ---
 const PORT = process.env.PORT || 5000;
-app.listen(PORT, () => {
-    console.log(`🚀 Raabta Backend running on http://localhost:${PORT}`);
-    console.log(`Ensure you have created a .env file with SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY`);
-});
+
+if (require.main === module) {
+    app.listen(PORT, () => {
+        console.log(`🚀 Raabta Backend running on http://localhost:${PORT}`);
+        console.log(`Ensure you have created a .env file with SUPABASE_URL and SUPABASE_SERVICE_ROLE_KEY`);
+    });
+}
+
+module.exports = app;
