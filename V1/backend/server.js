@@ -704,23 +704,22 @@ app.get('/api/admin/services', authenticateToken, authorizeRole(['admin']), asyn
     }
 });
 
-// FR3.2.4 - Edit Service Name
-app.patch('/api/admin/services/:id/name', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+// FR3.2.4 - Edit Full Service Data
+app.patch('/api/admin/services/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
     try {
         const { id } = req.params;
-        const { service_name } = req.body;
+        const { service_name, category, description } = req.body;
         
         const { error } = await supabase.from('services')
-            .update({ service_name })
+            .update({ service_name, category, description })
             .eq('service_id', id);
             
         if (error) throw error;
-        res.json({ message: 'Service renamed successfully' });
+        res.json({ message: 'Service updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }
 });
-
 // FR3.2.2 - Add New Service
 app.post('/api/admin/services', authenticateToken, authorizeRole(['admin']), async (req, res) => {
     try {
@@ -869,6 +868,26 @@ app.patch('/api/admin/complaints/:id/resolve', authenticateToken, authorizeRole(
 
         if (error) throw error;
         res.json({ message: 'Complaint resolved successfully' });
+    } catch (err) {
+        res.status(500).json({ error: err.message });
+    }
+});
+
+// FR3.1.5 - Update User (Admin)
+app.patch('/api/admin/users/:id', authenticateToken, authorizeRole(['admin']), async (req, res) => {
+    try {
+        const { id } = req.params;
+        const { full_name, email, role, account_status } = req.body;
+        
+        const { error } = await supabase.from('app_users')
+            .update({ full_name, email, role, account_status })
+            .eq('user_id', id);
+            
+        if (error) throw error;
+        
+        // Also update role-specific tables if necessary, but changing roles actively 
+        // usually requires deeper logic. We'll update the main table for now.
+        res.json({ message: 'User updated successfully' });
     } catch (err) {
         res.status(500).json({ error: err.message });
     }

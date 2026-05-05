@@ -1,7 +1,7 @@
 // Raabta frontend interactions - FULLY CONNECTED TO BACKEND
 (function(){
 'use strict';
-const API_BASE_URL = window.API_BASE_URL || 'http://localhost:8000/api';
+const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
 const pageIds=['pg-home','pg-auth','pg-customer','pg-admin','pg-supervisor'];
 const byId=id=>document.getElementById(id);
 const nativeScroll=window.scrollTo.bind(window);
@@ -485,17 +485,39 @@ window.doAddSvc = async function() {
     } catch(e) { alert('Error adding service: ' + e.message); }
 };
 
-window.editSvc = async function(id, currentName) {
-    const newName = prompt('Edit service name:', currentName);
-    if (!newName || newName === currentName) return;
+window.currentEditingSvcId = null;
+
+window.openEditSvc = function(encodedData) {
+    const svc = JSON.parse(decodeURIComponent(encodedData));
+    window.currentEditingSvcId = svc.service_id;
+    
+    document.getElementById('edit-svc-name').value = svc.service_name || '';
+    document.getElementById('edit-svc-category').value = svc.category || 'General';
+    document.getElementById('edit-svc-desc').value = svc.description || '';
+    
+    document.getElementById('editsvc-modal').classList.add('open');
+};
+
+window.closeEditSvc = () => document.getElementById('editsvc-modal').classList.remove('open');
+
+window.saveEditSvc = async function() {
+    if (!window.currentEditingSvcId) return;
+    
+    const name = document.getElementById('edit-svc-name').value.trim();
+    const category = document.getElementById('edit-svc-category').value;
+    const desc = document.getElementById('edit-svc-desc').value.trim();
+
+    if (!name) return alert("Service Name is required.");
+
     try {
-        await fetchWithAuth(`/admin/services/${id}/name`, {
+        await fetchWithAuth(`/admin/services/${window.currentEditingSvcId}`, {
             method: 'PATCH',
-            body: JSON.stringify({ service_name: newName })
+            body: JSON.stringify({ service_name: name, category: category, description: desc })
         });
+        closeEditSvc();
         loadAdminServices(); // Refresh table
-    } catch(e) {
-        alert('Error updating service: ' + e.message);
+    } catch (error) {
+        alert('Error updating service: ' + error.message);
     }
 };
 
@@ -874,15 +896,23 @@ document.addEventListener('DOMContentLoaded', () => {
 // Change Top Nav to "Dashboard" if logged in
 
 // --- Provider Management ---
-window.openAddProvider = async function() {
-    // Simple prompt-based input for adding a provider
-    const name = prompt("Enter Provider Name:");
-    if (!name) return;
-    const phone = prompt("Enter Phone Number (e.g. 0300-1234567):");
-    const area = prompt("Enter Service Area (e.g. Lahore):");
-    
-    // Default WhatsApp to the same as phone
-    const whatsapp = prompt("Enter WhatsApp Number:", phone);
+window.openAddProvider = function() {
+    document.getElementById('add-provider-name').value = '';
+    document.getElementById('add-provider-category').selectedIndex = 0;
+    document.getElementById('add-provider-city').value = '';
+    document.getElementById('add-provider-phone').value = '';
+    document.getElementById('add-provider-status').value = 'Active';
+    document.getElementById('addprovider-modal').classList.add('open');
+};
+window.closeAddProvider = () => document.getElementById('addprovider-modal').classList.remove('open');
+
+window.saveAddProvider = async function() {
+    const name = document.getElementById('add-provider-name').value.trim();
+    const city = document.getElementById('add-provider-city').value.trim();
+    const phone = document.getElementById('add-provider-phone').value.trim();
+    const status = document.getElementById('add-provider-status').value;
+
+    if (!name || !phone) return alert("Provider Name and Phone are required.");
 
     try {
         await fetchWithAuth('/supervisor/providers', {
@@ -890,46 +920,122 @@ window.openAddProvider = async function() {
             body: JSON.stringify({ 
                 provider_name: name, 
                 phone: phone, 
-                whatsapp_no: whatsapp, 
-                service_area: area 
+                whatsapp_no: phone, 
+                service_area: city,
+                availability_status: status === 'Active' ? 'available' : 'busy'
             })
         });
-        alert('Provider added successfully!');
-        loadSupervisorProviders(); // Refresh the list
+        closeAddProvider();
+        loadSupervisorProviders(); 
     } catch (error) {
         alert('Error adding provider: ' + error.message);
     }
 };
 
-window.openEditProvider = async function(encodedData) {
+window.currentEditingProviderId = null;
+
+window.openEditProvider = function(encodedData) {
     const p = JSON.parse(decodeURIComponent(encodedData));
+    window.currentEditingProviderId = p.provider_id;
     
-    // Simple prompt-based input for editing
-    const name = prompt("Update Provider Name:", p.provider_name);
-    if (name === null) return; // Cancelled
+    document.getElementById('edit-provider-name').value = p.provider_name || '';
+    document.getElementById('edit-provider-city').value = p.service_area || '';
+    document.getElementById('edit-provider-phone').value = p.phone || '';
+    document.getElementById('edit-provider-status').value = (p.availability_status === 'available') ? 'Active' : 'Inactive';
     
-    const phone = prompt("Update Phone Number:", p.phone);
-    const area = prompt("Update Service Area:", p.service_area);
-    const status = prompt("Update Status (Type 'available' or 'busy'):", p.availability_status);
+    document.getElementById('editprovider-modal').classList.add('open');
+};
+window.closeEditProvider = () => document.getElementById('editprovider-modal').classList.remove('open');
+
+window.saveEditProvider = async function() {
+    if (!window.currentEditingProviderId) return;
+    
+    const name = document.getElementById('edit-provider-name').value.trim();
+    const city = document.getElementById('edit-provider-city').value.trim();
+    const phone = document.getElementById('edit-provider-phone').value.trim();
+    const status = document.getElementById('edit-provider-status').value;
 
     try {
-        await fetchWithAuth(`/supervisor/providers/${p.provider_id}`, {
+        await fetchWithAuth(`/supervisor/providers/${window.currentEditingProviderId}`, {
             method: 'PATCH',
             body: JSON.stringify({ 
                 provider_name: name, 
                 phone: phone, 
-                whatsapp_no: phone, // Assuming WhatsApp is same as phone for edit
-                service_area: area,
-                availability_status: status?.toLowerCase() || 'available'
+                whatsapp_no: phone, 
+                service_area: city,
+                availability_status: status === 'Active' ? 'available' : 'busy'
             })
         });
-        alert('Provider updated successfully!');
-        loadSupervisorProviders(); // Refresh the list
+        closeEditProvider();
+        loadSupervisorProviders(); 
     } catch (error) {
         alert('Error updating provider: ' + error.message);
     }
 };
+// --- User Management ---
+window.openAddUser = function() {
+    document.getElementById('add-user-name').value = '';
+    document.getElementById('add-user-email').value = '';
+    document.getElementById('add-user-role').value = 'Customer';
+    document.getElementById('add-user-status').value = 'Active';
+    document.getElementById('adduser-modal').classList.add('open');
+};
+window.closeAddUser = () => document.getElementById('adduser-modal').classList.remove('open');
 
+window.saveAddUser = async function() {
+    const name = document.getElementById('add-user-name').value.trim();
+    const email = document.getElementById('add-user-email').value.trim();
+    const role = document.getElementById('add-user-role').value.toLowerCase();
+    
+    if (!name || !email) return alert("Name and Email are required.");
+
+    try {
+        // We reuse the auth/signup endpoint so passwords map correctly behind the scenes
+        await fetchWithAuth('/auth/signup', {
+            method: 'POST',
+            body: JSON.stringify({ full_name: name, email: email, password: 'defaultPassword123', role: role })
+        });
+        closeAddUser();
+        loadAdminUsers();
+    } catch (error) {
+        alert('Error adding user: ' + error.message);
+    }
+};
+
+window.currentEditingUserId = null;
+
+window.openEditUser = function(encodedData) {
+    const u = JSON.parse(decodeURIComponent(encodedData));
+    window.currentEditingUserId = u.user_id;
+    
+    document.getElementById('edit-user-name').value = u.full_name || '';
+    document.getElementById('edit-user-email').value = u.email || '';
+    document.getElementById('edit-user-role').value = u.role.charAt(0).toUpperCase() + u.role.slice(1);
+    document.getElementById('edit-user-status').value = u.account_status.charAt(0).toUpperCase() + u.account_status.slice(1);
+    
+    document.getElementById('edituser-modal').classList.add('open');
+};
+window.closeEditUser = () => document.getElementById('edituser-modal').classList.remove('open');
+
+window.saveEditUser = async function() {
+    if (!window.currentEditingUserId) return;
+    
+    const name = document.getElementById('edit-user-name').value.trim();
+    const email = document.getElementById('edit-user-email').value.trim();
+    const role = document.getElementById('edit-user-role').value.toLowerCase();
+    const status = document.getElementById('edit-user-status').value.toLowerCase();
+
+    try {
+        await fetchWithAuth(`/admin/users/${window.currentEditingUserId}`, {
+            method: 'PATCH',
+            body: JSON.stringify({ full_name: name, email: email, role: role, account_status: status })
+        });
+        closeEditUser();
+        loadAdminUsers();
+    } catch (error) {
+        alert('Error updating user: ' + error.message);
+    }
+};
 // ==========================================
 // ADMIN DASHBOARD FETCHERS
 // ==========================================
@@ -1008,53 +1114,87 @@ window.loadAdminAnalytics = async function() {
         if(byId('analytics-chart-bars')) byId('analytics-chart-bars').innerHTML = '<div style="color:var(--muted)">Failed to load data</div>';
     }
 };
-
 window.loadAdminUsers = async function() {
     try {
-        const tbody = byId('a-users-tbody');
+        const tbody = document.getElementById('a-users-tbody');
         if (!tbody) return;
         tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Loading users...</td></tr>';
 
         const users = await fetchWithAuth('/admin/users');
-        tbody.innerHTML = '';
+        
+        // 1. Save the users globally so the filter function can access them without re-fetching
+        window._adminUsers = users;
+        
+        // 2. Trigger the initial render (defaults to "All Users")
+        applyUserFilter();
 
-        if (!users || users.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">No users found.</td></tr>';
-            return;
-        }
-
-        users.forEach(u => {
-            // Determine badge colors based on role and status
-            const roleClass = u.role === 'admin' ? 'b-red' : (u.role === 'supervisor' ? 'b-blue' : 'b-gray');
-            const roleDisplay = u.role.charAt(0).toUpperCase() + u.role.slice(1);
-            
-            const statusClass = u.account_status === 'active' ? 'b-green' : 'b-amber';
-            const statusDisplay = u.account_status.charAt(0).toUpperCase() + u.account_status.slice(1);
-            
-            const dateStr = new Date(u.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
-
-            tbody.innerHTML += `
-                <tr>
-                    <td>
-                        <strong>${u.full_name}</strong><br>
-                        <span style="font-size:0.75rem;color:var(--muted)">Joined ${dateStr}</span>
-                    </td>
-                    <td>${u.email}</td>
-                    <td><span class="badge ${roleClass}">${roleDisplay}</span></td>
-                    <td><span style="color:var(--muted)">Standard</span></td>
-                    <td><span class="badge ${statusClass}">${statusDisplay}</span></td>
-                    <td style="text-align:right">
-                        <button class="btn-outline-sm" onclick="alert('Manage user modal coming soon!')">Manage</button>
-                    </td>
-                </tr>
-            `;
-        });
     } catch (error) {
         console.error("Users Load Error:", error);
-        if (byId('a-users-tbody')) {
-            byId('a-users-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Failed to load data. Is the backend running?</td></tr>';
+        if (document.getElementById('a-users-tbody')) {
+            document.getElementById('a-users-tbody').innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">Failed to load data. Is the backend running?</td></tr>';
         }
     }
+};
+
+// --- NEW FUNCTION TO HANDLE USER FILTERING ---
+window.applyUserFilter = function() {
+    const tbody = document.getElementById('a-users-tbody');
+    if (!tbody) return;
+
+    // Grab the current value from the dropdown
+    const filterVal = document.getElementById('a-user-filter')?.value || 'all';
+    
+    // Filter the stored users
+    let displayUsers = window._adminUsers || [];
+    
+    if (filterVal !== 'all') {
+        displayUsers = displayUsers.filter(u => {
+            if (filterVal === 'active_customer') return u.role === 'customer' && u.account_status === 'active';
+            if (filterVal === 'suspended_customer') return u.role === 'customer' && u.account_status !== 'active';
+            if (filterVal === 'supervisor') return u.role === 'supervisor';
+            if (filterVal === 'admin') return u.role === 'admin';
+            return true;
+        });
+    }
+
+    // Render the table with the filtered results
+    tbody.innerHTML = '';
+    
+    if (displayUsers.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="6" style="text-align:center;color:var(--muted);padding:1.5rem">No users found for this filter.</td></tr>';
+        return;
+    }
+
+    // This is your exact original formatting logic!
+    displayUsers.forEach(u => {
+        // Determine badge colors based on role and status
+        const roleClass = u.role === 'admin' ? 'b-red' : (u.role === 'supervisor' ? 'b-blue' : 'b-gray');
+        const roleDisplay = u.role.charAt(0).toUpperCase() + u.role.slice(1);
+        
+        const statusClass = u.account_status === 'active' ? 'b-green' : 'b-amber';
+        const statusDisplay = u.account_status.charAt(0).toUpperCase() + u.account_status.slice(1);
+        
+        const dateStr = new Date(u.created_at).toLocaleDateString([], { month: 'short', day: 'numeric', year: 'numeric' });
+
+        // Safely encode user data for the modal
+        const uData = encodeURIComponent(JSON.stringify(u));
+
+        tbody.innerHTML += `
+            <tr>
+                <td>
+                    <strong>${u.full_name}</strong><br>
+                    <span style="font-size:0.75rem;color:var(--muted)">Joined ${dateStr}</span>
+                </td>
+                <td>${u.email}</td>
+                <td><span class="badge ${roleClass}">${roleDisplay}</span></td>
+                <td><span style="color:var(--muted)">Standard</span></td>
+                <td><span class="badge ${statusClass}">${statusDisplay}</span></td>
+                <td style="text-align:right">
+                    <button class="btn-outline-sm" onclick="openEditUser('${uData}')">Manage</button>
+                </td>
+            </tr>
+        `;
+    });
 };
 
 window.loadAdminLogs = async function() {
@@ -1185,6 +1325,9 @@ window.loadAdminServices = async function() {
             const btnClass = isActive ? 'btn-outline-sm btn-svc-disable' : 'btn-outline-sm btn-svc-enable';
             const btnText = isActive ? 'Disable' : 'Enable';
 
+            // Safely encode service data for the modal
+            const svcData = encodeURIComponent(JSON.stringify(svc));
+
             tbody.innerHTML += `
                 <tr>
                     <td><strong>${svc.service_name}</strong></td>
@@ -1193,7 +1336,7 @@ window.loadAdminServices = async function() {
                     <td><span class="badge ${statusClass}">${statusText}</span></td>
                     <td style="text-align:right">
                         <div style="display:flex; gap:0.5rem; justify-content:flex-end">
-                            <button class="btn-outline-sm" onclick="editSvc(${svc.service_id}, '${svc.service_name}')">Edit</button>
+                            <button class="btn-outline-sm" onclick="openEditSvc('${svcData}')">Edit</button>
                             <button class="${btnClass}" onclick="toggleAdminSvc(${svc.service_id}, ${!isActive})">${btnText}</button>
                         </div>
                     </td>

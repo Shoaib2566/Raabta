@@ -693,3 +693,34 @@ body{padding-bottom:0!important}
 }
 .notif-text { font-size: 0.85rem; color: var(--text); line-height: 1.4; margin-top: 0.2rem; }
 .notif-time { font-size: 0.7rem; color: var(--muted); margin-top: 0.35rem; }
+
+
+
+/* =========================================================
+   DROPDOWN & BUTTON VISUAL FIXES
+   ========================================================= */
+
+/* 1. Fix the Filter Button hover state */
+.select-filter {
+    background-color: #FFFFFF !important; 
+    color: #132A1B !important; /* var(--g800) */
+    /* Force the browser to render the native dropdown in light mode */
+    color-scheme: light !important; 
+}
+
+.select-filter:hover {
+    background-color: #24502F !important; /* var(--g600) */
+    color: #FFFFFF !important;
+}
+
+/* 2. Hardcode colors for options just in case variables fail */
+.select-filter option, 
+select option {
+    background-color: #FFFFFF !important;
+    color: #1C1C1C !important;
+}
+
+/* 3. Ensure the Notification dropdown stays white */
+.notif-dropdown {
+    background-color: #FFFFFF !important;
+}
