@@ -10,7 +10,7 @@
     // CONSTANTS & CORE UTILITIES
     // =========================================================================
 
-    const API_BASE_URL = window.API_BASE_URL || 'http://localhost:5000/api';
+    const API_BASE_URL = window.API_BASE_URL || `${window.location.origin}/api`;
     const pageIds = ['pg-home', 'pg-auth', 'pg-customer', 'pg-admin', 'pg-supervisor'];
 
     const byId = id => document.getElementById(id);
