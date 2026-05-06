@@ -9,6 +9,7 @@ const cors    = require('cors');
 const bcrypt  = require('bcrypt');
 const jwt     = require('jsonwebtoken');
 const { createClient } = require('@supabase/supabase-js');
+const path = require('path');
 
 
 // =============================================================================
@@ -19,7 +20,13 @@ const app = express();
 
 app.use(cors());
 app.use(express.json());
+// Serve frontend files from V1/frontend
+app.use(express.static(path.join(__dirname, '../frontend')));
 
+// Frontend homepage
+app.get('/', (req, res) => {
+    res.sendFile(path.join(__dirname, '../frontend/index.html'));
+});
 // Request logger middleware
 app.use((req, res, next) => {
     console.log(`[${new Date().toLocaleTimeString()}] ${req.method} ${req.url}`);
