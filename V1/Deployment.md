@@ -209,9 +209,3 @@ GitHub Actions is useful because it checks tests and Docker builds before deploy
 
 AWS security groups control whether the deployed app is reachable from the internet. Docker port mapping alone is not enough unless the EC2 security group also allows that port.
 
-
-Before committing:```bashcd ~/Raabtatouch deployment_document.mdcode deployment_document.md
-Paste the content, save it, then:
-git add deployment_document.mdgit commit -m "Add deployment documentation"git push origin main
-If your final work is still on your branch, use:
-git push origin add-backend-api-tests
