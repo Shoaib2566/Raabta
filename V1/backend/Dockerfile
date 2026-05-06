@@ -2,12 +2,17 @@ FROM node:22-slim
 
 WORKDIR /app
 
-COPY package*.json ./
+COPY backend/package*.json ./backend/
+
+WORKDIR /app/backend
 
 RUN npm install
 
-COPY . .
+WORKDIR /app
+
+COPY backend ./backend
+COPY frontend ./frontend
 
 EXPOSE 5000
 
-CMD ["npm", "start"]
+CMD ["node", "backend/server.js"]
